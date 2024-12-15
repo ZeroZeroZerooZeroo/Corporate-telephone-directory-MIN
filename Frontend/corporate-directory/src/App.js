@@ -12,7 +12,7 @@ import Chats from './pages/Chats';
 import Events from './pages/Events';
 import Announcements from './pages/Announcements';
 import Home from './pages/Home';
-import Admin from './pages/Admin'; // Создайте страницу администратора
+import Admin from './pages/Admin'; // Страница администратора
 
 import './App.css';
 

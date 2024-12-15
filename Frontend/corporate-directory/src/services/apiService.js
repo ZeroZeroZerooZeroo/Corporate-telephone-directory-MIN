@@ -14,6 +14,23 @@ const getHeaders = () => {
     return { 'Content-Type': 'application/json' };
 };
 
+// Сотрудники (админ)
+const getEmployees = () => {
+    return axios.get(`${API_URL}/employees`, { headers: getHeaders() });
+};
+
+const addEmployee = (data) => {
+    return axios.post(`${API_URL}/employees`, data, { headers: getHeaders() });
+};
+
+const updateEmployee = (id, data) => {
+    return axios.put(`${API_URL}/employees/${id}`, data, { headers: getHeaders() });
+};
+
+const deleteEmployee= (id) => {
+    return axios.delete(`${API_URL}/employees/${id}`, { headers: getHeaders() });
+};
+
 // Чаты
 const getChats = (userId) => {
     return axios.get(`${API_URL}/chats/${userId}`, { headers: getHeaders() });
@@ -55,36 +72,78 @@ const getAllAnnouncements = () => {
 };
 
 // Уведомления
-const getUnreadMessagesCount = () => {
-    const user = authService.getCurrentUser();
+const getUnreadMessagesCount = (userId) => {
     return axios.get(`${API_URL}/messages/unread-count`, { headers: getHeaders() });
 };
 
 // Профиль
 const getProfile = (id) => {
-    return axios.get(`${API_URL}/profile/${id}`, { headers: getHeaders() });
+    return axios.get(`${API_URL}/profile/${id}`,{ headers: getHeaders() });
 };
 
-// Сотрудники (админ)
-const getEmployees = () => {
-    return axios.get(`${API_URL}/employees`, { headers: getHeaders() });
-};
 
-const addEmployee = (data) => {
-    return axios.post(`${API_URL}/employees`, data, { headers: getHeaders() });
-};
 
-const updateEmployee = (id, data) => {
-    return axios.put(`${API_URL}/employees/${id}`, data, { headers: getHeaders() });
-};
-
-const deleteEmployee = (id) => {
-    return axios.delete(`${API_URL}/employees/${id}`, { headers: getHeaders() });
-};
 const checkEmployeeActivity = () => {
-    return axios.post(`${API_URL}/check_employee_activity`, {}, { headers: getHeaders() });
+    return axios.post(`${API_URL}/check_employee_activity, {}`, { headers: getHeaders() });
 };
 
+
+
+// Documents (CRUD)
+const getDocuments = () => {
+    return axios.get(`${API_URL}/documents`, { headers: getHeaders() });
+};
+
+
+
+const updateDocument = (id, data) => {
+    return axios.put(`${API_URL}/documents/${id}`, data, { headers: getHeaders() });
+};
+
+const deleteDocument = (id) => {
+    return axios.delete(`${API_URL}/documents/${id}`, { headers: getHeaders() });
+};
+
+// Business Cards (CRUD)
+const getBusinessCards = () => {
+    return axios.get(`${API_URL}/business_cards`, { headers: getHeaders() });
+};
+
+const createBusinessCard = (data) => {
+    return axios.post(`${API_URL}/business_cards`, data, { headers: getHeaders() });
+};
+
+const updateBusinessCard = (id, data) => {
+    return axios.put(`${API_URL}/business_cards/${id}`, data, { headers: getHeaders() });
+};
+
+const deleteBusinessCard = (id) => {
+    return axios.delete(`${API_URL}/business_cards/${id}`, { headers: getHeaders() });
+};
+
+// Events (CRUD)
+
+const getCardTypes = () => {
+    return axios.get(`${API_URL}/card_types`, { headers: getHeaders() });
+};
+
+
+const createEvent = (data) => {
+    return axios.post(`${API_URL}/events`, data, { headers: getHeaders() });
+};
+
+const updateEvent = (id, data) => {
+    return axios.put(`${API_URL}/events/${id}`, data, { headers: getHeaders() });
+};
+
+const deleteEvent = (id) => {
+    return axios.delete(`${API_URL}/events/${id}`, { headers: getHeaders() });
+};
+
+// Event Locations
+const getEventLocations = () => {
+    return axios.get(`${API_URL}/event_locations`, { headers: getHeaders() });
+};
 
 export default {
     getChats,
@@ -102,6 +161,20 @@ export default {
     addEmployee,
     updateEmployee,
     deleteEmployee,
+    updateDocument,
     checkEmployeeActivity,
+    getCardTypes,
+    getDocuments,
+   deleteDocument,
+
+     getBusinessCards ,
+    createBusinessCard,
+   updateBusinessCard,
+    
+    
+    deleteBusinessCard ,
+     createEvent, updateEvent, deleteEvent ,
+     getEventLocations ,
+    
     // Другие методы
 };

@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
-import authService from '../services/authService';
 import apiService from '../services/apiService';
+import authService from '../services/authService';
 
 function Home() {
     const userData = authService.getCurrentUser();
@@ -18,15 +17,15 @@ function Home() {
                     const [eventsResponse, announcementsResponse, notificationsResponse] = await Promise.all([
                         apiService.getEvents(),
                         apiService.getActiveAnnouncements(),
-                        apiService.getUnreadMessagesCount()
+                        apiService.getUnreadMessagesCount(user.id_employee)
                     ]);
-
+    
                     setEvents(eventsResponse.data);
                     setAnnouncements(announcementsResponse.data);
                     setNotifications(notificationsResponse.data);
                 }
             } catch (err) {
-                console.error(err);
+                console.error('Ошибка при загрузке данных на главной странице:', err);
                 setError('Ошибка загрузки данных');
             }
         };
@@ -41,9 +40,11 @@ function Home() {
             {error && <p style={{ color: 'red' }}>{error}</p>}
             <section>
                 <h3>События</h3>
-                <ul>{events.map(event => (
+                <ul>
+                    {events.map(event => (
                         <li key={event.id_event}>
                             <p><strong>{event.name}</strong> - {new Date(event.date).toLocaleDateString()}</p>
+                            <p>{event.discription}</p>
                         </li>
                     ))}
                 </ul>
@@ -54,6 +55,7 @@ function Home() {
                     {announcements.map(announcement => (
                         <li key={announcement.id_announcement}>
                             <p><strong>{announcement.title}</strong>: {announcement.discription}</p>
+                            <p>С: {new Date(announcement.creation_date).toLocaleDateString()} По: {new Date(announcement.end_date).toLocaleDateString()}</p>
                         </li>
                     ))}
                 </ul>
@@ -62,8 +64,8 @@ function Home() {
                 <h3>Уведомления</h3>
                 <ul>
                     {notifications.map(notification => (
-                        <li key={notification.id}>
-                            {notification.message}
+                        <li key={notification.id_message}>
+                            {notification.content}
                         </li>
                     ))}
                 </ul>
