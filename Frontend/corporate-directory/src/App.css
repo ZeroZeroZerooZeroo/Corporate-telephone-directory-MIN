@@ -1,0 +1,85 @@
+.App {
+  text-align: center;
+  background-color: #e8f5e9; /* Светло-зеленый фон */
+  color: #2e7d32; /* Темно-зеленый цвет текста */
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.App-logo {
+  height: 40vmin;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .App-logo {
+    animation: App-logo-spin infinite 20s linear;
+  }
+}
+
+.App-header {
+  background-color: #a5d6a7; /* Более светлый оттенок зеленого длязаголовка */
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+  color: #1b5e20; /* Темный оттенок зеленого для текста в заголовке */
+}
+
+.App-link {
+  color: #66bb6a; /* Средний оттенок зеленого для ссылок */
+  text-decoration: none;
+}
+
+.App-link:hover {
+  color: #388e3c; /* Темнее зеленый при наведении */
+}
+
+@keyframes App-logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Дополнительно: Стили для Navbar и других компонентов */
+
+.navbar {
+  background-color: #81c784; /* Светло-зеленый фон для навбара */
+  padding: 10px 20px;
+}
+
+.navbar a {
+  color: #1b5e20; /* Темный зеленый для ссылок в навбаре */
+  margin: 0 10px;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.navbar a:hover {
+  color: #2e7d32; /* Немного темнее при наведении */
+}
+
+/* Пример стилей для других страниц */
+.page {
+  padding: 20px;
+  flex: 1;
+}
+
+button {
+  background-color: #66bb6a;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+button:hover {
+  background-color: #388e3c;
+}
