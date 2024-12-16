@@ -4,6 +4,7 @@ import apiService from '../services/apiService';
 function Events() {
     const [events, setEvents] = useState([]);
     const [eventLocations, setEventLocations] = useState([]);
+    const [employees, setEmployees] = useState([]); // Для выбора создателя
     const [error, setError] = useState('');
     const [message, setMessage] = useState('');
     const [showAddForm, setShowAddForm] = useState(false);
@@ -13,18 +14,20 @@ function Events() {
         name: '',
         discription: '',
         date: '',
-        id_event_location: null,
-        id_employee: null
+        id_event_location: '',
+        id_employee: ''
     });
 
     useEffect(() => {
         fetchEvents();
         fetchEventLocations();
+        fetchEmployees();
     }, []);
 
     const fetchEvents = async () => {
         try {
             const response = await apiService.getEvents();
+            console.log('Events:', response.data); // Логирование для отладки
             setEvents(response.data);
         } catch (err) {
             console.error(err);
@@ -39,6 +42,16 @@ function Events() {
         } catch (err) {
             console.error(err);
             setError('Ошибка получения мест проведения мероприятий');
+        }
+    };
+
+    const fetchEmployees = async () => {
+        try {
+            const response = await apiService.getEmployees(); // Предполагается, что этот маршрут доступен
+            setEmployees(response.data);
+        } catch (err) {
+            console.error(err);
+            setError('Ошибка получения списка сотрудников');
         }
     };
 
@@ -59,8 +72,8 @@ function Events() {
             name: '',
             discription: '',
             date: '',
-            id_event_location: null,
-            id_employee: null
+            id_event_location: '',
+            id_employee: ''
         });
         setShowAddForm(true);
         setShowEditForm(false);
@@ -71,7 +84,7 @@ function Events() {
         setFormData({
             name: event.name,
             discription: event.discription,
-            date: event.date,
+            date: event.date.split('T')[0], // Форматирование даты
             id_event_location: event.id_event_location,
             id_employee: event.id_employee
         });
@@ -91,8 +104,8 @@ function Events() {
         e.preventDefault();
         try {
             const data = { ...formData };
-            data.id_employee = parseInt(data.id_employee);
             data.id_event_location = parseInt(data.id_event_location);
+            data.id_employee = parseInt(data.id_employee);
             await apiService.createEvent(data);
             setShowAddForm(false);
             fetchEvents();
@@ -107,8 +120,8 @@ function Events() {
         e.preventDefault();
         try {
             const data = { ...formData };
-            data.id_employee = parseInt(data.id_employee);
-            data.id_event_location = parseInt(data.id_event_location);
+            data.id_event_location = parseInt(data.id_event_location); // Исправлено
+            data.id_employee = parseInt(data.id_employee); // Убедитесь, что это правильно
             await apiService.updateEvent(currentEvent.id_event, data);
             setShowEditForm(false);
             fetchEvents();
@@ -164,7 +177,7 @@ function Events() {
                         <label>Место проведения:</label>
                         <select
                             name="id_event_location"
-                            value={formData.id_event_location || ''}
+                            value={formData.id_event_location}
                             onChange={handleFormChange}
                             required
                         >
@@ -177,14 +190,19 @@ function Events() {
                         </select>
                     </div>
                     <div>
-                        <label>Создатель мероприятия (ID сотрудника):</label>
-                        <input
-                            type="number"
+                        <label>Создатель мероприятия:</label>
+                        <select
                             name="id_employee"
-                            value={formData.id_employee || ''}
+                            value={formData.id_employee}
                             onChange={handleFormChange}
                             required
-                        />
+                        >
+                            <option value="">--Выберите создателя--</option>
+                            {employees.map(emp => (
+                                <option key={emp.id_employee} value={emp.id_employee}>
+                                    {emp.full_name}</option>
+                            ))}
+                        </select>
                     </div>
                     <button type="submit">Создать</button>
                     <button type="button" onClick={() => setShowAddForm(false)}>Отмена</button>
@@ -228,7 +246,7 @@ function Events() {
                         <label>Место проведения:</label>
                         <select
                             name="id_event_location"
-                            value={formData.id_event_location || ''}
+                            value={formData.id_event_location}
                             onChange={handleFormChange}
                             required
                         >
@@ -241,14 +259,20 @@ function Events() {
                         </select>
                     </div>
                     <div>
-                        <label>Создатель мероприятия (ID сотрудника):</label>
-                        <input
-                            type="number"
+                        <label>Создатель мероприятия:</label>
+                        <select
                             name="id_employee"
-                            value={formData.id_employee || ''}
+                            value={formData.id_employee}
                             onChange={handleFormChange}
                             required
-                        />
+                        >
+                            <option value="">--Выберите создателя--</option>
+                            {employees.map(emp => (
+                                <option key={emp.id_employee} value={emp.id_employee}>
+                                    {emp.full_name}
+                                </option>
+                            ))}
+                        </select>
                     </div>
                     <button type="submit">Обновить</button>
                     <button type="button" onClick={() => setShowEditForm(false)}>Отмена</button>
@@ -261,9 +285,9 @@ function Events() {
                     <li key={event.id_event}>
                         <p><strong>{event.name}</strong></p>
                         <p>{event.discription}</p>
-                        <p>Дата: {new Date(event.date).toLocaleDateString()}</p>
-                        <p>Место: {event.id_event_location}</p>
-                        <p>Создатель: {event.id_employee}</p>
+                        <p><strong>Дата:</strong> {new Date(event.date).toLocaleDateString()}</p>
+                        <p><strong>Место проведения:</strong> {event.event_location_name || 'Не указано'}</p>
+                        <p><strong>Создатель:</strong> {event.creator_name || 'Не указан'}</p>
                         <button onClick={() => handleEdit(event)}>Редактировать</button>
                         <button onClick={() => handleDelete(event.id_event)}>Удалить</button>
                     </li>

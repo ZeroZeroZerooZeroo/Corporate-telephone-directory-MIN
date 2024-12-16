@@ -14,18 +14,18 @@ function Home() {
         const fetchData = async () => {
             try {
                 if (user) {
-                    const [eventsResponse, announcementsResponse, notificationsResponse] = await Promise.all([
+                    const [eventsResponse, announcementsResponse] = await Promise.all([
                         apiService.getEvents(),
                         apiService.getActiveAnnouncements(),
-                        apiService.getUnreadMessagesCount(user.id_employee)
+                       
                     ]);
-    
+
                     setEvents(eventsResponse.data);
                     setAnnouncements(announcementsResponse.data);
-                    setNotifications(notificationsResponse.data);
+                    
                 }
             } catch (err) {
-                console.error('Ошибка при загрузке данных на главной странице:', err);
+                console.error(err);
                 setError('Ошибка загрузки данных');
             }
         };

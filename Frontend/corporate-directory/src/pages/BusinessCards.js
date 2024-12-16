@@ -5,7 +5,7 @@ import authService from '../services/authService';
 function BusinessCards() {
     const user = authService.getCurrentUser();
     const [businessCards, setBusinessCards] = useState([]);
-    const [templates, setTemplates] = useState([]);
+    const [types, setTypes] = useState([]);
     const [error, setError] = useState('');
     const [message, setMessage] = useState('');
     const [showAddForm, setShowAddForm] = useState(false);
@@ -14,22 +14,22 @@ function BusinessCards() {
     const [formData, setFormData] = useState({
         content: '',
         creation_date: '',
-        id_card_type: null,
+        id_card_type: '',
         id_employee: user.user.id_employee
     });
 
-    useEffect(() => {
-        fetchTemplates();
+    useEffect(() =>{
+        fetchTypes();
         fetchBusinessCards();
     }, []);
 
-    const fetchTemplates = async () => {
+    const fetchTypes = async () => {
         try {
-            const response = await apiService.getCardTypes(); // Предполагается, что есть такой метод
-            setTemplates(response.data);
+            const response = await apiService.getCardTypes();
+            setTypes(response.data);
         } catch (err) {
             console.error(err);
-            setError('Ошибка получения шаблонов визиток');
+            setError('Ошибка получения типов визиток');
         }
     };
 
@@ -59,7 +59,7 @@ function BusinessCards() {
         setFormData({
             content: '',
             creation_date: '',
-            id_card_type: null,
+            id_card_type: '',
             id_employee: user.user.id_employee
         });
         setShowAddForm(true);
@@ -79,10 +79,10 @@ function BusinessCards() {
     };
 
     const handleFormChange = (e) => {
-        const { name, value } = e.target;
+        const { name, value, type, checked } = e.target;
         setFormData(prevData => ({
             ...prevData,
-            [name]: value
+            [name]: type === 'checkbox' ? checked : value
         }));
     };
 
@@ -90,7 +90,6 @@ function BusinessCards() {
         e.preventDefault();
         try {
             const data = { ...formData };
-            data.creation_date = new Date();
             await apiService.createBusinessCard(data);
             setShowAddForm(false);
             fetchBusinessCards();
@@ -105,7 +104,6 @@ function BusinessCards() {
         e.preventDefault();
         try {
             const data = { ...formData };
-            data.creation_date = new Date();
             await apiService.updateBusinessCard(currentCard.id_business_card, data);
             setShowEditForm(false);
             fetchBusinessCards();
@@ -122,38 +120,46 @@ function BusinessCards() {
             {message && <p style={{ color: 'green' }}>{message}</p>}
             {error && <p style={{ color: 'red' }}>{error}</p>}
 
-            <button onClick={handleAdd}>Создать визитку</button>
+            <button onClick={handleAdd}>Добавить визитку</button>
 
             {/* Форма добавления визитки */}
             {showAddForm && (
                 <form onSubmit={handleAddSubmit}>
                     <h3>Создать визитку</h3>
                     <div>
-                        <label>Выберите шаблон:</label>
-                        <select
-                            name="id_card_type"
-                            value={formData.id_card_type || ''}
-                            onChange={handleFormChange}
-                            required
-                        >
-                            <option value="">--Выберите шаблон--</option>
-                            {templates.map(template => (
-                                <option key={template.id_card_type} value={template.id_card_type}>
-                                    {template.type}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
-                    <div>
-                        <label>Содержимое:</label>
+                        <label>Содержание:</label>
                         <textarea
                             name="content"
                             value={formData.content}
                             onChange={handleFormChange}
-                            rows="5"
-                            cols="50"
                             required
                         />
+                    </div>
+                    <div>
+                        <label>Дата создания:</label>
+                        <input
+                            type="date"
+                            name="creation_date"
+                            value={formData.creation_date}
+                            onChange={handleFormChange}
+                            required
+                        />
+                    </div>
+                    <div>
+                        <label>Тип визитки:</label>
+                        <select
+                            name="id_card_type"
+                            value={formData.id_card_type}
+                            onChange={handleFormChange}
+                            required
+                        >
+                            <option value="">--Выберите тип--</option>
+                            {types.map(type => (
+                                <option key={type.id_card_type} value={type.id_card_type}>
+                                    {type.type}
+                                </option>
+                            ))}
+                        </select>
                     </div>
                     <button type="submit">Создать</button>
                     <button type="button" onClick={() => setShowAddForm(false)}>Отмена</button>
@@ -165,31 +171,39 @@ function BusinessCards() {
                 <form onSubmit={handleEditSubmit}>
                     <h3>Редактировать визитку</h3>
                     <div>
-                        <label>Выберите шаблон:</label>
-                        <select
-                            name="id_card_type"
-                            value={formData.id_card_type || ''}
-                            onChange={handleFormChange}
-                            required
-                        >
-                            <option value="">--Выберите шаблон--</option>
-                            {templates.map(template => (
-                                <option key={template.id_card_type} value={template.id_card_type}>
-                                    {template.type}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
-                    <div>
-                        <label>Содержимое:</label>
+                        <label>Содержание:</label>
                         <textarea
                             name="content"
                             value={formData.content}
                             onChange={handleFormChange}
-                            rows="5"
-                            cols="50"
                             required
                         />
+                    </div>
+                    <div>
+                        <label>Дата создания:</label>
+                        <input
+                            type="date"
+                            name="creation_date"
+                            value={formData.creation_date}
+                            onChange={handleFormChange}
+                            required
+                        />
+                    </div>
+                    <div>
+                        <label>Тип визитки:</label>
+                        <select
+                            name="id_card_type"
+                            value={formData.id_card_type}
+                            onChange={handleFormChange}
+                            required
+                        >
+                            <option value="">--Выберите тип--</option>
+                            {types.map(type => (
+                                <option key={type.id_card_type} value={type.id_card_type}>
+                                    {type.type}
+                                </option>
+                            ))}
+                        </select>
                     </div>
                     <button type="submit">Обновить</button>
                     <button type="button" onClick={() => setShowEditForm(false)}>Отмена</button>
@@ -199,8 +213,10 @@ function BusinessCards() {
             <h3>Список визиток</h3>
             <ul>
                 {businessCards.map(card => (
-                    <li key={card.id_business_card}>
-                        <strong>Тип: {card.id_card_type}</strong> - {card.content} - {new Date(card.creation_date).toLocaleDateString()}
+                    <li key={card.id_business_card} style={{ marginBottom: '10px' }}>
+                        <p><strong>Содержание:</strong> {card.content}</p>
+                        <p><strong>Дата создания:</strong> {new Date(card.creation_date).toLocaleDateString()}</p>
+                        <p><strong>Тип визитки:</strong> {card.card_type}</p>
                         <button onClick={() => handleEdit(card)}>Редактировать</button>
                         <button onClick={() => handleDelete(card.id_business_card)}>Удалить</button>
                     </li>

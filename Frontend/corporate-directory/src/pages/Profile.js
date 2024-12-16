@@ -39,17 +39,54 @@ function Profile() {
     if (error) return <p style={{ color: 'red' }}>{error}</p>;
     if (!profile) return <p>Загрузка...</p>;
 
+    // Поскольку profile является объектом сотрудника, просто используем его напрямую
+    const employee = profile;
+    const position = profile.position || null; // Если позиция не приходит с сервера, устанавливаем значение по умолчанию
+    const skills = profile.skills || [];       // Если навыки не приходят, устанавливаем пустой массив
+
     return (
-        <div>
+        <div style={styles.container}>
             <h2>Профиль</h2>
-            <p><strong>Полное имя:</strong> {profile.full_name}</p>
-            <p><strong>Email:</strong> {profile.email}</p>
-            <p><strong>Телефон:</strong> {profile.phone_number}</p>
-            <p><strong>Дата трудоустройства:</strong> {new Date(profile.employment_date).toLocaleDateString()}</p>
-            <p><strong>Администратор:</strong> {profile.is_admin ? 'Да' : 'Нет'}</p>
-            {/*Добавьте дополнительную информацию, например, должность, отдел и т.д. */}
+            <div style={styles.section}>
+                <h3>Основная информация</h3>
+                <p><strong>Полное имя:</strong> {employee.full_name}</p>
+                <p><strong>Email:</strong> {employee.email}</p>
+                <p><strong>Телефон:</strong> {employee.phone_number}</p>
+                <p><strong>Дата трудоустройства:</strong> {new Date(employee.employment_date).toLocaleDateString()}</p>
+                <p><strong>Администратор:</strong> {employee.is_admin ? 'Да' : 'Нет'}</p>
+            </div>
+            {position && (
+                <div style={styles.section}>
+                    <h3>Должность</h3>
+                    <p><strong>Название должности:</strong> {position.job_title || 'Не назначено'}</p>
+                    <p><strong>Отдел:</strong> {position.department || 'Не назначено'}</p>
+                    <p><strong>Офис:</strong> {position.office_number || 'Не назначено'}</p>
+                    <p><strong>Бизнес Центр:</strong> {position.business_center_address || 'Не назначено'}</p>
+                </div>
+            )}
+            {skills && skills.length > 0 && (
+                <div style={styles.section}>
+                    <h3>Навыки</h3>
+                    <ul>
+                        {skills.map((skill, index) => (
+                            <li key={index}>
+                                {skill.skill_name} - Уровень: {skill.skill_level}
+                            </li>
+                        ))}
+                    </ul>
+                </div>
+            )}
         </div>
     );
 }
+
+const styles = {
+    container: {
+        padding: '20px',
+    },
+    section: {
+        marginBottom: '20px',
+    },
+};
 
 export default Profile;

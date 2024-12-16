@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import apiService from '../services/apiService';
 import authService from '../services/authService'; 
 
-
 function Documents() {
     const user = authService.getCurrentUser();
     const [documents, setDocuments] = useState([]);
@@ -20,17 +19,17 @@ function Documents() {
         change_date: '',
         file_extention: '',
         id_employee: user.user.id_employee,
-        id_document_template: null
+        id_document_template: ''
     });
 
-    useEffect(() => {
+    useEffect(() =>{
         fetchTemplates();
         fetchDocuments();
     }, []);
 
     const fetchTemplates = async () => {
         try {
-            const response = await apiService.getDocumentTemplates();
+            const response = await apiService.getDocumentTemplate();
             setTemplates(response.data);
         } catch (err) {
             console.error(err);
@@ -69,7 +68,7 @@ function Documents() {
             change_date: '',
             file_extention: '',
             id_employee: user.user.id_employee,
-            id_document_template: null
+            id_document_template: ''
         });
         setShowAddForm(true);
         setShowEditForm(false);
@@ -81,8 +80,8 @@ function Documents() {
             title: document.title,
             description: document.description,
             path_file: document.path_file,
-            load_date: document.load_date,
-            change_date: document.change_date,
+            load_date: document.load_date.split('T')[0], // Форматирование даты
+            change_date: document.change_date.split('T')[0],
             file_extention: document.file_extention,
             id_employee: document.id_employee,
             id_document_template: document.id_document_template
@@ -138,147 +137,157 @@ function Documents() {
             {message && <p style={{ color: 'green' }}>{message}</p>}
             {error && <p style={{ color: 'red' }}>{error}</p>}
 
-<button onClick={handleAdd}>Добавить документ</button>
+            <button onClick={handleAdd}>Добавить документ</button>
 
-{/* Форма добавления документа */}
-{showAddForm && (
-    <form onSubmit={handleAddSubmit}>
-        <h3>Создать документ</h3>
-        <div>
-            <label>Название:</label>
-            <input
-                type="text"
-                name="title"
-                value={formData.title}
-                onChange={handleFormChange}
-                required
-            />
-        </div>
-        <div>
-            <label>Описание:</label>
-            <textarea
-                name="description"
-                value={formData.description}
-                onChange={handleFormChange}
-                required
-            />
-        </div>
-        <div>
-            <label>Путь к файлу:</label>
-            <input
-                type="text"
-                name="path_file"
-                value={formData.path_file}
-                onChange={handleFormChange}
-                required
-            />
-        </div>
-        <div>
-            <label>Расширение файла:</label>
-            <input
-                type="text"
-                name="file_extention"
-                value={formData.file_extention}
-                onChange={handleFormChange}
-                required
-            />
-        </div>
-        <div>
-            <label>Шаблон документа:</label>
-            <select
-                name="id_document_template"
-                value={formData.id_document_template || ''}
-                onChange={handleFormChange}
-                required
-            >
-                <option value="">--Выберите шаблон--</option>
-                {templates.map(template => (
-                    <option key={template.id_document_template} value={template.id_document_template}>
-                        {template.name}
-                    </option>
+            {/* Форма добавления документа */}
+            {showAddForm && (
+                <form onSubmit={handleAddSubmit}>
+                    <h3>Создать документ</h3>
+                    <div>
+                        <label>Название:</label>
+                        <input
+                            type="text"
+                            name="title"
+                            value={formData.title}
+                            onChange={handleFormChange}
+                            required
+                        />
+                    </div>
+                    <div>
+                        <label>Описание:</label>
+                        <textarea
+                            name="description"
+                            value={formData.description}
+                            onChange={handleFormChange}
+                            required
+                        />
+                    </div>
+                    <div>
+                        <label>Путь к файлу:</label>
+                        <input
+                            type="text"
+                            name="path_file"
+                            value={formData.path_file}
+                            onChange={handleFormChange}
+                            required
+                        />
+                    </div>
+                    <div>
+                        <label>Расширение файла:</label>
+                        <input
+                            type="text"
+                            name="file_extention"
+                            value={formData.file_extention}
+                            onChange={handleFormChange}
+                            required/>
+                            </div>
+                            <div>
+                                <label>Шаблон документа:</label>
+                                <select
+                                    name="id_document_template"
+                                    value={formData.id_document_template}
+                                    onChange={handleFormChange}
+                                    required
+                                >
+                                    <option value="">--Выберите шаблон--</option>
+                                    {templates.map(template => (
+                                        <option key={template.id_document_template} value={template.id_document_template}>
+                                            {template.name}
+                                        </option>
+                                    ))}
+
+                                </select>
+                            </div>
+                            <button type="submit">Создать</button>
+                            <button type="button" onClick={() => setShowAddForm(false)}>Отмена</button>
+                        </form>
+                    )}
+        
+                    {/* Форма редактирования документа */}
+                    {showEditForm && currentDocument && (
+                        <form onSubmit={handleEditSubmit}>
+                            <h3>Редактировать документ</h3>
+                            <div>
+                                <label>Название:</label>
+                                <input
+                                    type="text"
+                                    name="title"
+                                    value={formData.title}
+                                    onChange={handleFormChange}
+                                    required
+                                />
+                            </div>
+                            <div>
+                                <label>Описание:</label>
+                                <textarea
+                                    name="description"
+                                    value={formData.description}
+                                    onChange={handleFormChange}
+                                    required
+                                />
+                            </div>
+                            <div>
+                                <label>Путь к файлу:</label>
+                                <input
+                                    type="text"
+                                    name="path_file"
+                                    value={formData.path_file}
+                                    onChange={handleFormChange}
+                                    required
+                                />
+                            </div>
+                            <div>
+                                <label>Расширение файла:</label>
+                                <input
+                                    type="text"
+                                    name="file_extention"
+                                    value={formData.file_extention}
+                                    onChange={handleFormChange}
+                                    required
+                                />
+                            </div>
+                            <div>
+                                <label>Шаблон документа:</label>
+                                <select
+                                    name="id_document_template"
+                                    value={formData.id_document_template}
+                                    onChange={handleFormChange}
+                                    required
+                                >
+                                    <option value="">--Выберите шаблон--</option>
+                                    {templates.map(template => (
+                                        <option key={template.id_document_template} value={template.id_document_template}>
+                                            {template.name}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+                            <button type="submit">Обновить</button>
+                            <button type="button" onClick={() => setShowEditForm(false)}>Отмена</button>
+                        </form>
+                    )}
+        
+                    <h3>Список документов</h3>
+                    <ul>
+                        {documents.map(doc => (
+                            <li key={doc.id_document} style={{ marginBottom: '10px' }}>
+                                <strong>{doc.title}</strong> - {doc.description} - {doc.file_extention} 
+                        <p><strong>Шаблон:</strong> {doc.template_name || 'Не указан'}</p>
+                        <a 
+                            href={`http://localhost:5000/files/documents/${doc.path_file}`} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            style={{ marginLeft: '10px', textDecoration: 'none', color: '#007bff' }}
+                        >
+                            Открыть файл
+                        </a>
+                        <button onClick={() => handleEdit(doc)} style={{ marginLeft: '10px' }}>Редактировать</button>
+                        <button onClick={() => handleDelete(doc.id_document)} style={{ marginLeft: '5px' }}>Удалить</button>
+                    </li>
                 ))}
-            </select>
+            </ul>
         </div>
-        <button type="submit">Создать</button>
-        <button type="button" onClick={() => setShowAddForm(false)}>Отмена</button>
-    </form>
-)}
-
-{/* Форма редактирования документа */}
-{showEditForm && currentDocument && (
-    <form onSubmit={handleEditSubmit}>
-        <h3>Редактировать документ</h3>
-        <div>
-            <label>Название:</label>
-            <input
-                type="text"
-                name="title"
-                value={formData.title}
-                onChange={handleFormChange}
-                required
-            />
-        </div>
-        <div>
-            <label>Описание:</label>
-            <textarea
-                name="description"
-                value={formData.description}
-                onChange={handleFormChange}
-                required
-            />
-        </div>
-        <div>
-            <label>Путь к файлу:</label>
-            <input
-                type="text"
-                name="path_file"value={formData.path_file}
-                onChange={handleFormChange}
-                required
-            />
-        </div>
-        <div>
-            <label>Расширение файла:</label>
-            <input
-                type="text"
-                name="file_extention"
-                value={formData.file_extention}
-                onChange={handleFormChange}
-                required
-            />
-        </div>
-        <div>
-            <label>Шаблон документа:</label>
-            <select
-                name="id_document_template"
-                value={formData.id_document_template || ''}
-                onChange={handleFormChange}
-                required
-            >
-                <option value="">--Выберите шаблон--</option>
-                {templates.map(template => (
-                    <option key={template.id_document_template} value={template.id_document_template}>
-                        {template.name}
-                    </option>
-                ))}
-            </select>
-        </div>
-        <button type="submit">Обновить</button>
-        <button type="button" onClick={() => setShowEditForm(false)}>Отмена</button>
-    </form>
-)}
-
-<h3>Список документов</h3>
-<ul>
-    {documents.map(doc => (
-        <li key={doc.id_document}>
-            <strong>{doc.title}</strong> - {doc.description} - {doc.file_extention} - {doc.path_file}
-            <button onClick={() => handleEdit(doc)}>Редактировать</button>
-            <button onClick={() => handleDelete(doc.id_document)}>Удалить</button>
-        </li>
-    ))}
-</ul>
-</div>
-);
+    );
 }
 
 export default Documents;

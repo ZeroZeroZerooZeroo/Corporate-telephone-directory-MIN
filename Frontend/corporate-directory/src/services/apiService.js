@@ -49,9 +49,6 @@ const markMessageAsRead = (id_message) => {
 };
 
 // Документы
-const getDocumentTemplates = () => {
-    return axios.get(`${API_URL}/document_templates`, { headers: getHeaders() });
-};
 
 const createDocument = (data) => {
     return axios.post(`${API_URL}/documents`, data, { headers: getHeaders() });
@@ -77,14 +74,35 @@ const getUnreadMessagesCount = (userId) => {
 };
 
 // Профиль
+// Профиль
 const getProfile = (id) => {
-    return axios.get(`${API_URL}/profile/${id}`,{ headers: getHeaders() });
+    return axios.get(`${API_URL}/profile/${id}`, { headers: getHeaders() });
 };
 
 
 
+// Офисы
+const getOffices = () => {
+    return axios.get(`${API_URL}/offices`, { headers: getHeaders() });
+};
+
+// Бизнес-центры
+const getBusinessCenters = () => {
+    return axios.get(`${API_URL}/business_centers`, { headers: getHeaders() });
+};
+
+// Отделы
+const getDepartments = () => {
+    return axios.get(`${API_URL}/departments`, { headers: getHeaders() });
+};
+
+// Должности
+const getPositions = () => {
+    return axios.get(`${API_URL}/positions`, { headers: getHeaders() });
+};
+
 const checkEmployeeActivity = () => {
-    return axios.post(`${API_URL}/check_employee_activity, {}`, { headers: getHeaders() });
+    return axios.post(`${API_URL}/check_employee_activity`, {}, { headers: getHeaders() });
 };
 
 
@@ -127,6 +145,9 @@ const getCardTypes = () => {
     return axios.get(`${API_URL}/card_types`, { headers: getHeaders() });
 };
 
+const getDocumentTemplate = () => {
+    return axios.get(`${API_URL}/document_template`, { headers: getHeaders() });
+};
 
 const createEvent = (data) => {
     return axios.post(`${API_URL}/events`, data, { headers: getHeaders() });
@@ -145,12 +166,29 @@ const getEventLocations = () => {
     return axios.get(`${API_URL}/event_locations`, { headers: getHeaders() });
 };
 
+
+
+// Личные сообщения
+const sendPersonalMessage = (id_requester, content) => {
+    return axios.post(`${API_URL}/messages`, { id_requester, content }, { headers: getHeaders() });
+};
+
+const getPersonalMessages = (userId) => {
+    return axios.get(`${API_URL}/messages/${userId}`, { headers: getHeaders() });
+};
+
+const markPersonalMessageAsRead = (messageId) => {
+    return axios.post(`${API_URL}/messages/${messageId}/read`, {}, { headers: getHeaders() });
+};
+
+
+
 export default {
     getChats,
     getMessages,
     sendMessage,
     markMessageAsRead,
-    getDocumentTemplates,
+    
     createDocument,
     getEvents,
     getActiveAnnouncements,
@@ -163,18 +201,26 @@ export default {
     deleteEmployee,
     updateDocument,
     checkEmployeeActivity,
+    sendPersonalMessage,
+    getPersonalMessages,
+    markPersonalMessageAsRead,
     getCardTypes,
     getDocuments,
    deleteDocument,
-
+   
      getBusinessCards ,
     createBusinessCard,
    updateBusinessCard,
-    
+   getOffices,
+   getBusinessCenters,
+   getDepartments,
+   getPositions,
     
     deleteBusinessCard ,
-     createEvent, updateEvent, deleteEvent ,
+     createEvent, 
+     updateEvent, 
+     deleteEvent ,
      getEventLocations ,
-    
+     getDocumentTemplate,
     // Другие методы
 };

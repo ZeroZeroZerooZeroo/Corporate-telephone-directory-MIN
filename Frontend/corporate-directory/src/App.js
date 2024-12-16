@@ -9,10 +9,12 @@ import Profile from './pages/Profile';
 import Documents from './pages/Documents';
 import BusinessCards from './pages/BusinessCards';
 import Chats from './pages/Chats';
+import PersonalMessages from './pages/PersonalMessages';
 import Events from './pages/Events';
 import Announcements from './pages/Announcements';
 import Home from './pages/Home';
-import Admin from './pages/Admin'; // Страница администратора
+import Admin from './pages/Admin';
+import CompanyInfo from './pages/CompanyInfo'; // Импорт новой страницы
 
 import './App.css';
 
@@ -59,6 +61,13 @@ function App() {
                         } 
                     />
                     <Route 
+                        path="/personal-messages" 
+                        element={
+                            <ProtectedRoute><PersonalMessages />
+                            </ProtectedRoute>
+                        } 
+                    />
+                    <Route 
                         path="/events" 
                         element={
                             <ProtectedRoute>
@@ -71,6 +80,14 @@ function App() {
                         element={
                             <ProtectedRoute>
                                 <Announcements />
+                            </ProtectedRoute>
+                        } 
+                    />
+                    <Route 
+                        path="/company-info" 
+                        element={
+                            <ProtectedRoute>
+                                <CompanyInfo />
                             </ProtectedRoute>
                         } 
                     />
