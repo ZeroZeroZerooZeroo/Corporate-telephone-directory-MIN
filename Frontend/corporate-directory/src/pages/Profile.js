@@ -36,11 +36,22 @@ function Profile() {
         checkActivity();
     }, []);
 
+    // Функция для безопасного форматирования даты
+    const formatDate = (dateString) => {
+        if (!dateString) return 'Не указано';
+        const date = new Date(dateString);
+        if (isNaN(date)) {
+            return 'Не указано';
+        } else {
+            return date.toLocaleDateString();
+        }
+    };
+
     if (error) return <p style={{ color: 'red' }}>{error}</p>;
     if (!profile) return <p>Загрузка...</p>;
 
-    // Поскольку profile является объектом сотрудника, просто используем его напрямую
-    const employee = profile;
+    // Предполагается, что profile включает employee, position и skills
+    const employee = profile.employee;
     const position = profile.position || null; // Если позиция не приходит с сервера, устанавливаем значение по умолчанию
     const skills = profile.skills || [];       // Если навыки не приходят, устанавливаем пустой массив
 
@@ -52,7 +63,7 @@ function Profile() {
                 <p><strong>Полное имя:</strong> {employee.full_name}</p>
                 <p><strong>Email:</strong> {employee.email}</p>
                 <p><strong>Телефон:</strong> {employee.phone_number}</p>
-                <p><strong>Дата трудоустройства:</strong> {new Date(employee.employment_date).toLocaleDateString()}</p>
+                <p><strong>Дата трудоустройства:</strong> {formatDate(employee.employment_date)}</p>
                 <p><strong>Администратор:</strong> {employee.is_admin ? 'Да' : 'Нет'}</p>
             </div>
             {position && (
@@ -73,7 +84,7 @@ function Profile() {
                                 {skill.skill_name} - Уровень: {skill.skill_level}
                             </li>
                         ))}
-                    </ul>
+                        </ul>
                 </div>
             )}
         </div>

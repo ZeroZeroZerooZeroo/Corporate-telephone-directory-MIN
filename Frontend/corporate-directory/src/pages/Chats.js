@@ -11,11 +11,27 @@ function Chats() {
     const [newMessage, setNewMessage] = useState('');
     const [error, setError] = useState('');
 
+    const removeDuplicateChats = (chats) => {
+        const uniqueChats = [];
+        const chatIds = new Set();
+
+        chats.forEach(chat => {
+            if (!chatIds.has(chat.id_group_chat)) {
+                uniqueChats.push(chat);
+                chatIds.add(chat.id_group_chat);
+            }
+        });
+
+        return uniqueChats;
+    };
+
     useEffect(() => {
         const fetchChats = async () => {
             try {
                 const response = await apiService.getChats(user.id_employee);
-                setChats(response.data);
+                console.log('Полученные чаты:', response.data); // Для отладки
+                const uniqueChats = removeDuplicateChats(response.data);
+                setChats(uniqueChats);
             } catch (err) {
                 console.error('Ошибка при получении чатов:', err);
                 setError('Ошибка получения чатов');

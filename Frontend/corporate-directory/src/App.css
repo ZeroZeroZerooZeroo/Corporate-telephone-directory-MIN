@@ -5,6 +5,7 @@
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  font-family: 'Arial', sans-serif;
 }
 
 .App-logo {
@@ -19,7 +20,7 @@
 }
 
 .App-header {
-  background-color: #a5d6a7; /* Более светлый оттенок зеленого длязаголовка */
+  background-color: #a5d6a7; /* Более светлый оттенок зеленого для заголовка */
   padding: 20px;
   display: flex;
   flex-direction: column;
@@ -47,11 +48,14 @@
   }
 }
 
-/* Дополнительно: Стили для Navbar и других компонентов */
-
+/* Стили для Navbar */
 .navbar {
   background-color: #81c784; /* Светло-зеленый фон для навбара */
   padding: 10px 20px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
 }
 
 .navbar a {
@@ -59,18 +63,36 @@
   margin: 0 10px;
   text-decoration: none;
   font-weight: bold;
+  padding: 5px 10px;
+  border-radius: 4px;
+  transition: background-color 0.3s;
 }
 
 .navbar a:hover {
-  color: #2e7d32; /* Немного темнее при наведении */
+  color: #ffffff; /* Белый при наведении */
+  background-color: #2e7d32; /* Темный зеленый фон при наведении */
 }
 
-/* Пример стилей для других страниц */
+.navbar button {
+  background-color: #f44336;
+  color: white;
+  border: none;
+  padding: 7px 14px;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: background-color 0.3s;
+}
+
+.navbar button:hover {
+  background-color: #c62828;
+}
+
+/* Стили для страниц */
 .page {
   padding: 20px;
   flex: 1;
 }
-
+/* Стили для кнопок */
 button {
   background-color: #66bb6a;
   color: white;
@@ -78,8 +100,121 @@ button {
   padding: 10px 20px;
   cursor: pointer;
   border-radius: 4px;
+  font-size: 16px;
+  transition: background-color 0.3s;
 }
 
 button:hover {
   background-color: #388e3c;
+}
+
+/* Форма */
+form {
+  max-width: 500px;
+  margin: 0 auto;
+  text-align: left;
+}
+
+form div {
+  margin-bottom: 15px;
+}
+
+form label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
+}
+
+form input[type="text"],
+form input[type="email"],
+form input[type="password"],
+form input[type="date"],
+form select,
+form textarea {
+  width: 100%;
+  padding: 8px;
+  box-sizing: border-box;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+}
+
+form textarea {
+  resize: vertical;
+}
+
+form button {
+  margin-right: 10px;
+}
+
+/* Таблицы */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+
+table, th, td {
+  border: 1px solid #ccc;
+}
+
+th, td {
+  padding: 10px;
+  text-align: left;
+}
+
+th {
+  background-color: #a5d6a7;
+}
+
+/** Списки */
+ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+li {
+  padding: 10px;
+  margin-bottom: 10px;
+  background-color: #ffffff;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  transition: background-color 0.3s;
+}
+
+li:hover {
+  background-color: #f1f8e9;
+}
+
+/* Дополнительные стили */
+.section {
+  margin-bottom: 30px;
+}
+
+.error {
+  color: #d32f2f;
+  margin-bottom: 10px;
+}
+
+.success {
+  color: #2e7d32;
+  margin-bottom: 10px;
+}
+
+@media (max-width: 768px) {
+  .navbar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .navbar a {
+    margin: 5px 0;
+  }
+
+  .page {
+    padding: 10px;
+  }
+
+  form {
+    padding: 10px;
+  }
 }

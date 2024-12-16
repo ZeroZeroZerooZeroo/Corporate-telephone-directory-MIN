@@ -12,7 +12,6 @@ const login = async ({ email, password }) => {
             'Content-Type': 'application/json',
         },
     });
-    // Предполагаем, что сервер возвращает { token, user }
     if (response.data.token) {
         localStorage.setItem('user', JSON.stringify(response.data));
     }

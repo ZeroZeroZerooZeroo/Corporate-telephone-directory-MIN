@@ -8,7 +8,6 @@ function Navbar() {
     const location = useLocation();
 
     useEffect(() => {
-        // Проверяем наличие изменений в localStorage при изменении маршрута
         const updatedUserData = authService.getCurrentUser();
         setUserData(updatedUserData);
         setUser(updatedUserData ? updatedUserData.user : null);
@@ -33,7 +32,14 @@ function Navbar() {
                     <Link to="/events" style={styles.link}>События</Link>
                     <Link to="/announcements" style={styles.link}>Объявления</Link>
                     <Link to="/company-info" style={styles.link}>Информация о компании</Link>
-                    {user.is_admin && <Link to="/admin" style={styles.link}>Админ</Link>}
+                    {user.is_admin && (
+                        <>
+                            <Link to="/admin" style={styles.link}>Админ</Link>{/* Добавляем ссылки на новые отчеты */}
+                            
+                            
+                  
+                        </>
+                    )}
                     <button onClick={handleLogout} style={styles.logoutButton}>Выход</button>
                 </>
             ) : (
@@ -53,11 +59,13 @@ const styles = {
         marginBottom: '20px',
         display: 'flex',
         alignItems: 'center',
+        flexWrap: 'wrap',
     },
     link: {
         marginRight: '15px',
         textDecoration: 'none',
         color: '#333',
+        marginBottom: '5px',
     },
     logoutButton: {
         padding: '5px 10px',

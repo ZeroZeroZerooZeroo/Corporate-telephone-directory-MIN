@@ -14,7 +14,7 @@ import Events from './pages/Events';
 import Announcements from './pages/Announcements';
 import Home from './pages/Home';
 import Admin from './pages/Admin';
-import CompanyInfo from './pages/CompanyInfo'; // Импорт новой страницы
+import CompanyInfo from './pages/CompanyInfo';
 
 import './App.css';
 
@@ -63,12 +63,13 @@ function App() {
                     <Route 
                         path="/personal-messages" 
                         element={
-                            <ProtectedRoute><PersonalMessages />
+                            <ProtectedRoute>
+                                <PersonalMessages />
                             </ProtectedRoute>
                         } 
                     />
-                    <Route 
-                        path="/events" 
+                    <Route
+                    path="/events" 
                         element={
                             <ProtectedRoute>
                                 <Events />
