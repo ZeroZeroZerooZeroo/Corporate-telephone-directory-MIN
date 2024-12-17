@@ -8,28 +8,30 @@ function CompanyInfo() {
     const [positions, setPositions] = useState([]);
     const [activeTab, setActiveTab] = useState('offices');
     const [error, setError] = useState('');
+    const [message, setMessage] = useState('');
 
     useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const [officesRes, businessCentersRes, departmentsRes, positionsRes] = await Promise.all([
-                    apiService.getOffices(),
-                    apiService.getBusinessCenters(),
-                    apiService.getDepartments(),
-                    apiService.getPositions()
-                ]);
-
-                setOffices(officesRes.data);
-                setBusinessCenters(businessCentersRes.data);
-                setDepartments(departmentsRes.data);
-                setPositions(positionsRes.data);
-            } catch (err) {
-                console.error(err);
-                setError('Ошибка загрузки информации о компании');
-            }
-        };
         fetchData();
     }, []);
+
+    const fetchData = async () => {
+        try {
+            const [officesRes, businessCentersRes, departmentsRes, positionsRes] = await Promise.all([
+                apiService.getOffices(),
+                apiService.getBusinessCenters(),
+                apiService.getDepartments(),
+                apiService.getPositions()
+            ]);
+
+            setOffices(officesRes.data);
+            setBusinessCenters(businessCentersRes.data);
+            setDepartments(departmentsRes.data);
+            setPositions(positionsRes.data);
+        } catch (err) {
+            console.error(err);
+            setError('Ошибка загрузки информации о компании');
+        }
+    };
 
     const renderTabContent = () => {
         switch(activeTab) {
@@ -44,7 +46,8 @@ function CompanyInfo() {
                                     <p><strong>Бизнес центр:</strong> {office.business_center_address || 'Не определено'}</p>
                                 </li>
                             ))}
-                        </ul></div>
+                        </ul>
+                    </div>
                 );
             case 'businessCenters':
                 return (
@@ -84,7 +87,7 @@ function CompanyInfo() {
                         <ul>
                             {positions.map(position => (
                                 <li key={position.id_position} style={styles.listItem}>
-                                    <p><strong>Название должности:</strong> {position.job_title || 'Не назначено'}</p>
+                                    <p><strong>Название должности:</strong> {position.position_name || 'Не назначено'}</p>
                                     <p><strong>Отдел:</strong> {position.department || 'Не назначено'}</p>
                                     <p><strong>Офис:</strong> {position.office_number || 'Не назначено'}</p>
                                     <p><strong>Бизнес центр:</strong> {position.business_center_address || 'Не назначено'}</p>
@@ -103,6 +106,7 @@ function CompanyInfo() {
         <div style={styles.container}>
             <h2>Информация о компании</h2>
             {error && <p style={{ color: 'red' }}>{error}</p>}
+            {message && <p style={{ color: 'green' }}>{message}</p>}
             <div style={styles.tabContainer}>
                 <button 
                     onClick={() => setActiveTab('offices')} 
@@ -126,7 +130,8 @@ function CompanyInfo() {
                     onClick={() => setActiveTab('positions')} 
                     style={activeTab === 'positions' ? styles.activeTabButton : styles.tabButton}
                 >
-                    Должности</button>
+                    Должности
+                </button>
             </div>
             <div style={styles.content}>
                 {renderTabContent()}

@@ -150,19 +150,7 @@ function Chats() {
                                     <div style={{ fontSize: '0.8em', color: 'gray' }}>
                                         {new Date(msg.send_time).toLocaleString()}
                                     </div>
-                                    {msg.id_read_status === 1 && msg.id_sender !== user.id_employee && (
-                                        <button 
-                                            onClick={() => handleMarkAsRead(msg.id_group_message)} 
-                                            style={{ 
-                                                fontSize: '0.7em', 
-                                                marginTop: '5px', 
-                                                padding: '2px 5px',
-                                                cursor: 'pointer' 
-                                            }}
-                                        >
-                                            Отметить как прочитанное
-                                        </button>
-                                    )}
+                                   
                                 </div>
                             ))}
                         </div>

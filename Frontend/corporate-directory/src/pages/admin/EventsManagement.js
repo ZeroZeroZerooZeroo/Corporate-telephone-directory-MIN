@@ -133,78 +133,9 @@ function EventsManagement() {
             {error && <p style={{ color: 'red' }}>{error}</p>}
             {message && <p style={{ color: 'green' }}>{message}</p>}
 
-            <button onClick={handleAdd} style={styles.addButton}>Добавить мероприятие</button>
+            
 
-            {/* Форма добавления мероприятия */}
-            {showAddForm && (
-                <form onSubmit={handleAddSubmit} style={styles.form}>
-                    <h4>Создать мероприятие</h4>
-                    <div style={styles.formGroup}>
-                        <label>Название:</label>
-                        <input
-                            type="text"
-                            name="name"
-                            value={formData.name}
-                            onChange={handleFormChange}
-                            required
-                        />
-                    </div>
-                    <div style={styles.formGroup}>
-                        <label>Описание:</label>
-                        <textarea
-                            name="discription"
-                            value={formData.discription}
-                            onChange={handleFormChange}
-                            required
-                        />
-                    </div>
-                    <div style={styles.formGroup}>
-                        <label>Дата:</label>
-                        <input
-                            type="date"
-                            name="date"
-                            value={formData.date}
-                            onChange={handleFormChange}
-                            required
-                        />
-                    </div>
-                    <div style={styles.formGroup}>
-                        <label>Место проведения:</label>
-                        <select
-                            name="id_event_location"
-                            value={formData.id_event_location}
-                            onChange={handleFormChange}
-                            required
-                        >
-                            <option value="">--Выберите место--</option>
-                            {eventLocations.map(location => (
-                                <option key={location.id_event_location} value={location.id_event_location}>
-                                    {location.name}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
-                    <div style={styles.formGroup}>
-                        <label>Создатель мероприятия (ID):</label>
-                        <select
-                            name="id_employee"
-                            value={formData.id_employee}
-                            onChange={handleFormChange}
-                            required
-                        >
-                            <option value="">--Выберите создателя--</option>
-                            {employees.map(emp => (
-                                <option key={emp.id_employee} value={emp.id_employee}>
-                                    {emp.full_name}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
-                    <button type="submit" style={styles.submitButton}>Создать</button>
-                    <button type="button" onClick={() => setShowAddForm(false)} style={styles.cancelButton}>Отмена</button>
-                </form>
-            )}
-
+            
             {/* Форма редактирования мероприятия */}
             {showEditForm && currentEvent && (
                 <form onSubmit={handleEditSubmit} style={styles.form}>

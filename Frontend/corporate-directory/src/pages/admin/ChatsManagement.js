@@ -4,26 +4,23 @@ import apiService from '../../services/apiService';
 function ChatsManagement() {
     const [chats, setChats] = useState([]);
     const [employees, setEmployees] = useState([]);
+    const [roles, setRoles] = useState([]);
     const [selectedChat, setSelectedChat] = useState(null);
-    const [selectedEmployees, setSelectedEmployees] = useState([]);
+    const [selectedEmployee, setSelectedEmployee] = useState('');
+    const [selectedRole, setSelectedRole] = useState('');
     const [error, setError] = useState('');
     const [message, setMessage] = useState('');
 
     useEffect(() => {
         fetchChats();
         fetchEmployees();
+        fetchRoles();
     }, []);
 
     const fetchChats = async () => {
         try {
             const response = await apiService.getChats();
-            console.log('Chats from API:', response.data);
-
-            // Удаление дубликатов по id_group_chat
-            const uniqueChats = Array.from(
-                new Map(response.data.map(chat => [chat.id_group_chat, chat])).values()
-            );
-            setChats(uniqueChats);
+            setChats(response.data);
         } catch (err) {
             console.error(err);
             setError('Ошибка получения чатов');
@@ -40,57 +37,46 @@ function ChatsManagement() {
         }
     };
 
-    const handleAddEmployeesToChat = async () => {
-        if (!selectedChat) {
-            setError('Выберите чат');
-            return;
+    const fetchRoles = async () => {
+        try {
+            const response = await apiService.getRoles();
+            setRoles(response.data);
+        } catch (err) {
+            console.error(err);
+            setError('Ошибка получения ролей');
         }
-        if (selectedEmployees.length === 0) {
-            setError('Выберите сотрудников для добавления');
+    };
+
+    const handleAddUserToChat = async (e) => {
+        e.preventDefault();
+        if (!selectedChat || !selectedEmployee || !selectedRole) {
+            setError('Пожалуйста, заполните все поля');
             return;
         }
         try {
-            await apiService.addEmployeesToChat(selectedChat.id_group_chat, selectedEmployees);
-            setMessage('Сотрудники успешно добавлены в чат');
-            setSelectedEmployees([]);
-            fetchChats();
+            await apiService.addUserToChat(selectedChat.id_group_chat, parseInt(selectedEmployee), parseInt(selectedRole));
+            setMessage('Сотрудник успешно добавлен в чат');
+            setSelectedEmployee('');
+            setSelectedRole('');
+            fetchChats(); // Обновляем список чатов, если необходимо
         } catch (err) {
             console.error(err);
-            setError('Ошибка добавления сотрудников в чат');
+            setError(err.response?.data?.message || 'Ошибка добавления сотрудника в чат');
         }
-    };
-
-    const handleChatSelect = (chat) => {
-        setSelectedChat(chat);
-        setMessage('');
-        setError('');
-    };
-
-    const handleEmployeeSelect = (e) => {
-        const options = e.target.options;
-        const selected = [];
-        for (let i = 0; i < options.length; i++) {
-            if (options[i].selected) {
-                selected.push(parseInt(options[i].value, 10));
-            }
-        }
-        setSelectedEmployees(selected);
     };
 
     return (
         <div style={styles.container}>
             <h3>Управление Чатами</h3>
-            {error && <p className="error">{error}</p>}
-            {message && <p className="success">{message}</p>}
-
-            {/* Список чатов */}
+            {error && <p style={{ color: 'red' }}>{error}</p>}
+            {message && <p style={{ color: 'green' }}>{message}</p>}
             <div style={styles.chatList}>
                 <h4>Список Чатов</h4>
                 <ul style={styles.ul}>
                     {chats.map(chat => (
                         <li
-                            key={chat.id_group_chat} // Убедитесь, что id_group_chat уникален
-                            onClick={() => handleChatSelect(chat)}
+                            key={chat.id_group_chat}
+                            onClick={() => setSelectedChat(chat)}
                             style={{
                                 ...styles.chatItem,
                                 backgroundColor: selectedChat && selectedChat.id_group_chat === chat.id_group_chat ? '#e0f7fa' : '#ffffff'
@@ -103,24 +89,42 @@ function ChatsManagement() {
                 </ul>
             </div>
 
-            {/* Форма добавления сотрудников в чат */}
             {selectedChat && (
                 <div style={styles.addForm}>
-                    <h4>Добавить сотрудников в чат: {selectedChat.name}</h4>
-                    <select multiple
-                        value={selectedEmployees}
-                        onChange={handleEmployeeSelect}
-                        style={styles.select}
-                    >
-                        {employees.map(emp => (
-                            <option key={emp.id_employee} value={emp.id_employee}>
-                                {emp.full_name} (ID: {emp.id_employee})
-                            </option>
-                        ))}
-                    </select>
-                    <button onClick={handleAddEmployeesToChat} style={styles.button}>
-                        Добавить
-                    </button>
+                    <h4>Добавить сотрудника в чат: {selectedChat.name}</h4>
+                    <form onSubmit={handleAddUserToChat}>
+                        <div style={styles.formGroup}>
+                            <label>Сотрудник:</label>
+                            <select
+                                value={selectedEmployee}
+                                onChange={(e) => setSelectedEmployee(e.target.value)}
+                                required
+                            >
+                                <option value="">--Выберите сотрудника--</option>
+                                {employees.map(emp => (
+                                    <option key={emp.id_employee} value={emp.id_employee}>
+                                        {emp.full_name} (ID: {emp.id_employee})
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+                        <div style={styles.formGroup}>
+                            <label>Роль:</label>
+                            <select
+                                value={selectedRole}
+                                onChange={(e) => setSelectedRole(e.target.value)}
+                                required
+                            >
+                                <option value="">--Выберите роль--</option>
+                                {roles.map(role => (
+                                    <option key={role.id_role} value={role.id_role}>
+                                        {role.name}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+                        <button type="submit" style={styles.submitButton}>Добавить</button>
+                    </form>
                 </div>
             )}
         </div>
@@ -155,23 +159,18 @@ const styles = {
         margin: '20px auto',
         textAlign: 'left',
     },
-    select: {
-        width: '100%',
-        height: '150px',
-        padding: '10px',
-        marginBottom: '10px',
-        borderRadius: '4px',
-        border: '1px solid #ccc',
-        fontSize: '16px',
+    formGroup: {
+        marginBottom: '15px',
+        display: 'flex',
+        flexDirection: 'column',
     },
-    button: {
-        padding: '10px 20px',
+    submitButton: {
+        padding: '10px 15px',
         backgroundColor: '#007bff',
         color: '#fff',
         border: 'none',
-        borderRadius: '4px',
+        borderRadius: '3px',
         cursor: 'pointer',
-        fontSize: '16px',
     },
 };
 

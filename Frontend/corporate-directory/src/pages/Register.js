@@ -70,7 +70,8 @@ function Register() {
                     />
                 </div>
                 <div>
-                    <label>Пароль:</label><input 
+                    <label>Пароль:</label>
+                    <input 
                         type="password" 
                         value={password} 
                         onChange={(e) => setPassword(e.target.value)} 

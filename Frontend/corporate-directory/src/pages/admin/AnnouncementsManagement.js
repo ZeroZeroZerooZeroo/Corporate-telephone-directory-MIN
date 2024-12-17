@@ -78,19 +78,7 @@ function AnnouncementsManagement() {
         }));
     };
 
-    const handleAddSubmit = async (e) => {
-        e.preventDefault();
-        try {
-            const data = { ...formData };
-            await apiService.createAnnouncement(data);
-            setShowAddForm(false);
-            fetchAnnouncements();
-            setMessage('Объявление успешно создано');
-        } catch (err) {
-            console.error(err);
-            setError('Ошибка добавления объявления');
-        }
-    };
+    
 
     const handleEditSubmit = async (e) => {
         e.preventDefault();
@@ -112,66 +100,9 @@ function AnnouncementsManagement() {
             {error && <p className="error">{error}</p>}
             {message && <p className="success">{message}</p>}
 
-            <button onClick={handleAdd} style={{ ...styles.button, backgroundColor: '#28a745' }}>Добавить объявление</button>
+            
 
-            {/* Форма добавления объявления */}
-            {showAddForm && (
-                <form onSubmit={handleAddSubmit} style={styles.form}>
-                    <h4>Создать объявление</h4>
-                    <div>
-                        <label>Название:</label>
-                        <input
-                            type="text"
-                            name="title"
-                            value={formData.title}
-                            onChange={handleFormChange}
-                            required
-                        />
-                    </div>
-                    <div>
-                        <label>Описание:</label>
-                        <textarea
-                            name="discription"
-                            value={formData.discription}
-                            onChange={handleFormChange}
-                            required
-                        />
-                    </div>
-                    <div>
-                        <label>Дата создания:</label>
-                        <input
-                            type="date"
-                            name="creation_date"
-                            value={formData.creation_date}
-                            onChange={handleFormChange}
-                            required
-                        />
-                    </div>
-                    <div>
-                        <label>Дата окончания:</label>
-                        <input
-                            type="date"
-                            name="end_date"
-                            value={formData.end_date}
-                            onChange={handleFormChange}
-                            required
-                        />
-                    </div>
-                    <div>
-                        <label>Создатель объявления (ID):</label>
-                        <input
-                            type="number"
-                            name="id_employee"
-                            value={formData.id_employee}
-                            onChange={handleFormChange}
-                            required
-                        />
-                    </div>
-                    <button type="submit" style={{ ...styles.button, backgroundColor: '#007bff' }}>Создать</button>
-                    <button type="button" onClick={() => setShowAddForm(false)} style={{ ...styles.button, backgroundColor: '#6c757d' }}>Отмена</button>
-                </form>
-            )}
-
+            
             {/* Форма редактирования объявления */}
             {showEditForm && currentAnnouncement && (
                 <form onSubmit={handleEditSubmit} style={styles.form}>

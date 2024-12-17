@@ -1,27 +1,44 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import authService from '../services/authService';
+import apiService from '../services/apiService'; // Добавлен импорт apiService
 
 function Navbar() {
     const [userData, setUserData] = useState(authService.getCurrentUser());
-    const [user, setUser] = useState(userData ? userData.user : null);
+    const user = userData ? userData.user : null;
     const location = useLocation();
+    const [unreadCount, setUnreadCount] = useState(0);
 
     useEffect(() => {
         const updatedUserData = authService.getCurrentUser();
         setUserData(updatedUserData);
-        setUser(updatedUserData ? updatedUserData.user : null);
     }, [location]);
 
     const handleLogout = () => {
         authService.logout();
         setUserData(null);
-        setUser(null);
+        window.location.reload();
     };
+
+    useEffect(() => {
+        const fetchUnreadCount = async () => {
+            try {
+                const notifications = await apiService.getNotifications();
+                const count = notifications.data.filter(n => !n.is_read).length;
+                setUnreadCount(count);
+            } catch (err) {
+                console.error(err);
+            }
+        };
+        fetchUnreadCount();
+
+        const interval = setInterval(fetchUnreadCount, 60000); // Обновление каждые 60 секунд
+        return () => clearInterval(interval);
+    }, []);
 
     return (
         <nav style={styles.navbar}>
-            <Link to="/" style={styles.link}>Главная</Link>
+            
             {user && userData && userData.token ? (
                 <>
                     <Link to="/profile" style={styles.link}>Профиль</Link>
@@ -30,15 +47,13 @@ function Navbar() {
                     <Link to="/chats" style={styles.link}>Чаты</Link>
                     <Link to="/personal-messages" style={styles.link}>Личные Сообщения</Link>
                     <Link to="/events" style={styles.link}>События</Link>
+                    <Link to="/notifications" style={styles.link}>
+                        Уведомления 
+                    </Link>
                     <Link to="/announcements" style={styles.link}>Объявления</Link>
-                    <Link to="/company-info" style={styles.link}>Информация о компании</Link>
+                    
                     {user.is_admin && (
-                        <>
-                            <Link to="/admin" style={styles.link}>Админ</Link>{/* Добавляем ссылки на новые отчеты */}
-                            
-                            
-                  
-                        </>
+                        <Link to="/admin" style={styles.link}>Админ</Link>
                     )}
                     <button onClick={handleLogout} style={styles.logoutButton}>Выход</button>
                 </>

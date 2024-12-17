@@ -5,18 +5,25 @@ function Reports() {
     const [employeesReport, setEmployeesReport] = useState([]);
     const [uniqueSkillsReport, setUniqueSkillsReport] = useState([]);
     const [employeesWithoutPhoneReport, setEmployeesWithoutPhoneReport] = useState([]);
+    const [countUnreadMessages, setCountUnreadMessages] = useState([]);
+    const [todaysEvents, setTodaysEvents] = useState([]);
     const [error, setError] = useState('');
     const [reportMessage, setReportMessage] = useState('');
 
-    
     const [normInactive, setNormInactive] = useState('');
     const [normRole, setNormRole] = useState('');
     const [roleName, setRoleName] = useState('');
     const [normLowSkills, setNormLowSkills] = useState('');
+
     const [showEmployeesReport, setShowEmployeesReport] = useState(false);
     const [showUniqueSkillsReport, setShowUniqueSkillsReport] = useState(false);
     const [showEmployeesWithoutPhoneReport, setShowEmployeesWithoutPhoneReport] = useState(false);
+    const [showUnreadMessagesReport, setShowUnreadMessagesReport] = useState(false);
+    const [showTodaysEventsReport, setShowTodaysEventsReport] = useState(false);
 
+    useEffect(() => {
+        // Вы можете добавить автоматическую загрузку отчетов при загрузке компонента
+    }, []);
 
     const generateEmployeesReport = async () => {
         try {
@@ -24,6 +31,8 @@ function Reports() {
             setEmployeesReport(response.data);
             setUniqueSkillsReport([]);
             setEmployeesWithoutPhoneReport([]);
+            setCountUnreadMessages([]);
+            setTodaysEvents([]);
         } catch (err) {
             console.error(err);
             setError('Ошибка получения отчета по сотрудникам');
@@ -36,6 +45,8 @@ function Reports() {
             setUniqueSkillsReport(response.data);
             setEmployeesReport([]);
             setEmployeesWithoutPhoneReport([]);
+            setCountUnreadMessages([]);
+            setTodaysEvents([]);
         } catch (err) {
             console.error(err);
             setError('Ошибка получения отчета по уникальным навыкам');
@@ -48,11 +59,25 @@ function Reports() {
             setEmployeesWithoutPhoneReport(response.data);
             setEmployeesReport([]);
             setUniqueSkillsReport([]);
+            setCountUnreadMessages([]);
+            setTodaysEvents([]);
         } catch (err) {
             console.error(err);
             setError('Ошибка получения списка сотрудников без телефона');
         }
     };
+
+    const generateCountUnreadMessagesReport = async () => {
+        try {
+            const response = await apiService.getCountUnreadMessagesPerEmployee();
+            setCountUnreadMessages(response.data);
+        } catch (err) {
+            console.error(err);
+            setError('Ошибка получения отчета о непрочитанных сообщениях');
+        }
+    };
+
+    
 
     const handleNotifyInactive = async () => {
         try {
@@ -98,6 +123,8 @@ function Reports() {
                 <button onClick={generateEmployeesReport} style={styles.reportButton}>Отчет по сотрудникам</button>
                 <button onClick={generateUniqueSkillsReport} style={styles.reportButton}>Отчет по уникальным навыкам</button>
                 <button onClick={generateEmployeesWithoutPhoneReport} style={styles.reportButton}>Сотрудники без телефона</button>
+                <button onClick={generateCountUnreadMessagesReport} style={styles.reportButton}>Непрочитанные сообщения</button>
+                
             </div>
 
             {/* Отображение отчетов */}
@@ -146,7 +173,7 @@ function Reports() {
                                     <th>Имя сотрудника</th>
                                     <th>Название отдела</th>
                                     <th>Уникальный навык</th>
-                                    </tr>
+                                </tr>
                             </thead>
                             <tbody>
                                 {uniqueSkillsReport.map((skill, index) => (
@@ -161,45 +188,7 @@ function Reports() {
                         </table>
                     </div>
                 )}
-                {/* Отчеты */}
-            <div style={{ marginTop: '20px' }}>
-                {/* Уведомить неактивных сотрудников */}
-                <h3>Уведомить неактивных сотрудников</h3>
-                <input
-                    type="number"
-                    placeholder="Норма сообщений"
-                    value={normInactive}
-                    onChange={(e) => setNormInactive(e.target.value)}
-                />
-                <button onClick={handleNotifyInactive} style={{ marginLeft: '10px'}}>Отправить уведомления</button>
 
-                {/* Присвоить роль */}
-                <h3 style={{ marginTop: '20px' }}>Присвоить роль сотрудникам</h3>
-                <input
-                    type="number"
-                    placeholder="Норма сообщений"
-                    value={normRole}
-                    onChange={(e) => setNormRole(e.target.value)}
-                />
-                <input
-                    type="text"
-                    placeholder="Название роли"
-                    value={roleName}
-                    onChange={(e) => setRoleName(e.target.value)}
-                    style={{ marginLeft: '10px' }}
-                />
-                <button onClick={handleAssignRole} style={{ marginLeft: '10px' }}>Присвоить роль</button>
-
-                {/* Уведомить о низких навыках */}
-                <h3 style={{ marginTop: '20px' }}>Уведомить о низких навыках</h3>
-                <input
-                    type="number"
-                    placeholder="Пороговый уровень навыка"
-                    value={normLowSkills}
-                    onChange={(e) => setNormLowSkills(e.target.value)}
-                />
-                <button onClick={handleNotifyLowSkills} style={{ marginLeft: '10px' }}>Отправить уведомления</button>
-            </div>
                 {/* Отчет: сотрудники без телефона */}
                 {employeesWithoutPhoneReport.length > 0 && (
                     <div>
@@ -211,30 +200,82 @@ function Reports() {
                         </ul>
                     </div>
                 )}
+
+                {/* Отчет: непрочитанные сообщения */}
+                {countUnreadMessages.length > 0 && (
+                    <div>
+                        <h4>Количество непрочитанных сообщений по сотрудникам</h4>
+                        <table style={styles.table}>
+                            <thead>
+                                <tr>
+                                    <th>Имя сотрудника</th>
+                                    <th>Количество непрочитанных сообщений</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {countUnreadMessages.map((item, index) => (
+                                    <tr key={index}>
+                                        <td>{item.employee_name}</td>
+                                        <td>{item.unread_count}</td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                )}
+
+                
+            </div>
+
+            {/* Форма действий */}
+            <div style={{ marginTop: '20px' }}>
+                {/* Уведомить неактивных сотрудников */}
+                <h3>Уведомить неактивных сотрудников</h3>
+                <input
+                    type="number"
+                    placeholder="Норма сообщений"
+                    value={normInactive}
+                    onChange={(e) => setNormInactive(e.target.value)}
+                />
+                <button onClick={handleNotifyInactive} style={{ marginLeft: '10px' }}>Отправить уведомления</button>
+
+                
+
+                {/* Уведомить о низких навыках */}
+                <h3 style={{ marginTop: '20px' }}>Уведомить о низких навыках</h3>
+                <input
+                    type="number"
+                    placeholder="Пороговый уровень навыка"
+                    value={normLowSkills}
+                    onChange={(e) => setNormLowSkills(e.target.value)}
+                />
+                <button onClick={handleNotifyLowSkills} style={{ marginLeft: '10px' }}>Отправить уведомления</button>
             </div>
         </div>
     );
 }
+    const styles = {
+        buttonGroup: {
+            display: 'flex',
+            gap: '10px',
+            marginBottom: '20px',
+            flexWrap: 'wrap',
+        },
+        reportButton: {
+            padding: '10px 15px',
+            backgroundColor: '#17a2b8',
+            color: '#fff',
+            border: 'none',
+            borderRadius: '3px',
+            cursor: 'pointer',
+            flex: '1 1 200px',
+        },
+        table: {
+            width: '100%',
+            borderCollapse: 'collapse',
+            marginBottom: '20px',
+        },
+    };
 
-const styles = {
-    buttonGroup: {
-        display: 'flex',
-        gap: '10px',
-        marginBottom: '20px',
-    },
-    reportButton: {
-        padding: '10px 15px',
-        backgroundColor: '#17a2b8',
-        color: '#fff',
-        border: 'none',
-        borderRadius: '3px',
-        cursor: 'pointer',
-    },
-    table: {
-        width: '100%',
-        borderCollapse: 'collapse',
-        marginBottom: '20px',
-    },
-};
+    export default Reports;
 
-export default Reports;

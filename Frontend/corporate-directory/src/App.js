@@ -12,9 +12,13 @@ import Chats from './pages/Chats';
 import PersonalMessages from './pages/PersonalMessages';
 import Events from './pages/Events';
 import Announcements from './pages/Announcements';
-import Home from './pages/Home';
+
 import Admin from './pages/Admin';
-import CompanyInfo from './pages/CompanyInfo';
+import Notifications from './pages/Notifications';
+
+
+
+
 
 import './App.css';
 
@@ -24,7 +28,7 @@ function App() {
             <Router>
                 <Navbar />
                 <Routes>
-                    <Route path="/" element={<Home />} />
+                    <Route path="/" element={<Profile />} />
                     <Route path="/login" element={<Login />} />
                     <Route path="/register" element={<Register />} />
                     
@@ -84,11 +88,11 @@ function App() {
                             </ProtectedRoute>
                         } 
                     />
-                    <Route 
-                        path="/company-info" 
+                     <Route 
+                        path="/notifications" 
                         element={
                             <ProtectedRoute>
-                                <CompanyInfo />
+                                <Notifications />
                             </ProtectedRoute>
                         } 
                     />

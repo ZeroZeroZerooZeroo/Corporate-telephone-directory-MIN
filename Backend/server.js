@@ -4,6 +4,9 @@ const bodyParser = require('body-parser');
 const { Pool } = require('pg');
 const jwt = require('jsonwebtoken');
 const path = require('path');
+
+
+
 require('dotenv').config();
 
 const pool = new Pool({
@@ -17,7 +20,9 @@ const pool = new Pool({
 const app = express();
 app.use(cors());
 app.use(bodyParser.json());
-app.use('/files/documents', express.static(path.join(__dirname, 'uploads/documents')));
+
+
+
 
 // Middleware для проверки JWT-токена
 const authenticateToken = (req, res, next) => {
@@ -31,6 +36,8 @@ const authenticateToken = (req, res, next) => {
         next();
     });
 };
+
+
 
 // Регистрация
 app.post('/api/register', async (req, res) => {
@@ -51,6 +58,8 @@ app.post('/api/register', async (req, res) => {
         res.status(500).send('Ошибка регистрации');
     }
 });
+
+
 
 // Логин
 app.post('/api/login', async (req, res) => {
@@ -209,9 +218,7 @@ app.get('/api/positions', authenticateToken, async (req, res) => {
 
 // Получение всех сотрудников (для админов)
 app.get('/api/employees', authenticateToken, async (req, res) => {
-    if (!req.user.is_admin) {
-        return res.status(403).json({ message: 'Доступ только для администраторов' });
-    }
+   
 
     try {
         const result = await pool.query('SELECT * FROM employee ORDER BY id_employee ASC');
@@ -240,6 +247,10 @@ app.post('/api/employees', authenticateToken, async (req, res) => {
         res.status(500).send('Ошибка добавления сотрудника');
     }
 });
+
+
+
+
 
 // Обновление сотрудника (админ)
 app.put('/api/employees/:id', authenticateToken, async (req, res) => {
@@ -284,15 +295,15 @@ app.delete('/api/employees/:id', authenticateToken, async (req, res) => {
 });
 
 // Получение всех документов
-app.get('/api/documents', authenticateToken, async (req, res) => {
+app.get('/api/documents', authenticateToken, async (req, res) =>{
     try {
         const result = await pool.query(`
             SELECT d.id_document, d.title, d.description, d.path_file, d.load_date, d.change_date, 
                    d.file_extention, d.id_employee, dt.name AS template_name
             FROM document d
             LEFT JOIN document_template dt ON d.id_document_template = dt.id_document_template
-            ORDER BY d.id_document ASC
-        `);
+            ORDER BY d.id_document ASC`
+        );
         res.json(result.rows);
     } catch (err) {
         console.error(err);
@@ -300,9 +311,38 @@ app.get('/api/documents', authenticateToken, async (req, res) => {
     }
 });
 
+// Получение мероприятий на текущий день
+app.get('/api/events/today', authenticateToken, async (req, res) => {
+    try {
+        const result = await pool.query(`
+            SELECT e.*, 
+                   emp.full_name AS creator_name, 
+                   el.name AS event_location_name
+            FROM events e
+            LEFT JOIN employee emp ON e.id_employee = emp.id_employee
+            LEFT JOIN event_location el ON e.id_event_location = el.id_event_location
+            WHERE e.date = CURRENT_DATE
+            ORDER BY e.date ASC
+        `);
+        res.json(result.rows);
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Ошибка получения мероприятий на текущий день');
+    }
+});
+
+
 // Создание документа
 app.post('/api/documents', authenticateToken, async (req, res) => {
-    const { title, description, path_file, load_date, change_date, file_extention, id_employee, id_document_template } = req.body;
+    const { title, description, path_file, file_extention, id_document_template } = req.body;
+    const load_date = new Date();
+    const change_date = new Date();
+    const id_employee = req.user.id_employee;
+
+    if (!path_file || !file_extention) {
+        return res.status(400).json({ message: 'Путь к файлу и расширение обязательны' });
+    }
+
     try {
         const result = await pool.query(
             `INSERT INTO document 
@@ -312,7 +352,7 @@ app.post('/api/documents', authenticateToken, async (req, res) => {
         );
         res.status(201).json(result.rows[0]);
     } catch (err) {
-        console.error(err);
+        console.error('Ошибка создания документа:', err);
         res.status(500).send('Ошибка создания документа');
     }
 });
@@ -320,15 +360,20 @@ app.post('/api/documents', authenticateToken, async (req, res) => {
 // Обновление документа
 app.put('/api/documents/:id', authenticateToken, async (req, res) => {
     const { id } = req.params;
-    const { title, description, path_file, load_date, change_date, file_extention, id_employee, id_document_template } = req.body;
+    const { title, description, path_file, file_extention, id_document_template } = req.body;
+    const change_date = new Date();
+
+    if (!path_file || !file_extention) {
+        return res.status(400).json({ message: 'Путь к файлу и расширение обязательны' });
+    }
+
     try {
         const result = await pool.query(
             `UPDATE document 
-             SET title = $1, description = $2, path_file = $3, load_date = $4, 
-                 change_date = $5, file_extention = $6, id_employee = $7, 
-                 id_document_template = $8
-             WHERE id_document = $9 RETURNING *`,
-            [title, description, path_file, load_date, change_date, file_extention, id_employee, id_document_template, id]
+             SET title = $1, description = $2, path_file = $3, 
+                 change_date = $4, file_extention = $5, id_document_template = $6
+             WHERE id_document = $7 RETURNING *`,
+            [title, description, path_file, change_date, file_extention, id_document_template, id]
         );
         if (result.rows.length === 0) {
             return res.status(404).json({ message: 'Документ не найден' });
@@ -339,6 +384,8 @@ app.put('/api/documents/:id', authenticateToken, async (req, res) => {
         res.status(500).send('Ошибка обновления документа');
     }
 });
+
+
 
 // Удаление документа
 app.delete('/api/documents/:id', authenticateToken, async (req, res) => {
@@ -383,34 +430,6 @@ app.get('/api/reports/unique-skills', authenticateToken, async (req, res) => {
     }
 });
 
-// 3. Сотрудники без телефона
-app.get('/api/reports/employees-without-phone', authenticateToken, async (req, res) => {
-    if (!req.user.is_admin) {
-        return res.status(403).json({ message: 'Доступ только для администраторов' });
-    }
-    try {
-        const result = await pool.query(`SELECT * FROM ListEmployeesWithoutPhone()`);
-        res.json(result.rows);
-    } catch (err) {
-        console.error(err);
-        res.status(500).send('Ошибка получения списка сотрудников без телефона');
-    }
-});
-
-// 4. Уведомить неактивных сотрудников
-app.post('/api/reports/notify-inactive', authenticateToken, async (req, res) => {
-    if (!req.user.is_admin) {
-        return res.status(403).json({ message: 'Доступ только для администраторов' });
-    }
-    const { norm } = req.body; //Норма сообщений
-    try {
-        await pool.query(`SELECT NotifyInactiveEmployees($1)`, [norm]);
-        res.status(200).json({ message: 'Уведомления отправлены' });
-    } catch (err) {
-        console.error(err);
-        res.status(500).send('Ошибка отправки уведомлений о неактивности');
-    }
-});
 
 // 5. Присвоить роль сотрудникам
 app.post('/api/reports/assign-role', authenticateToken, async (req, res) => {
@@ -547,57 +566,69 @@ app.get('/api/chats', authenticateToken, async (req, res) => {
     }
 });
 
-app.post('/api/chats/:chatId/add-employees', authenticateToken, async (req, res) => {
-    const { chatId } = req.params;
-    const { employeeIds } = req.body; // Ожидается массив ID сотрудников
+app.post('/api/chats/:id_group_chat/add-user', authenticateToken, async (req, res) => {
+    // Проверяем, что пользователь является администратором
+    if (!req.user.is_admin) {
+        return res.status(403).json({ message: 'Доступ только для администраторов' });
+    }
 
-    if (!Array.isArray(employeeIds) || employeeIds.length === 0) {
-        return res.status(400).json({ message: 'employeeIds должен быть непустым массивом' });
+    const { id_group_chat } = req.params;
+    const { id_employee, id_role } = req.body;
+
+    if (!id_employee || !id_role) {
+        return res.status(400).json({ message: 'Необходимы id_employee и id_role' });
     }
 
     try {
         // Проверяем, существует ли чат
-        const chatResult = await pool.query('SELECT * FROM group_chat WHERE id_group_chat = $1', [chatId]);
+        const chatResult = await pool.query('SELECT * FROM group_chat WHERE id_group_chat = $1', [id_group_chat]);
         if (chatResult.rows.length === 0) {
             return res.status(404).json({ message: 'Чат не найден' });
         }
 
-        // Проверяем, существует ли каждый сотрудник и уже не участвует ли он в чате
-        const validEmployeeIds = [];
-        for (const id of employeeIds) {
-            const employeeResult = await pool.query('SELECT * FROM employee WHERE id_employee = $1', [id]);
-            if (employeeResult.rows.length === 0) {
-                return res.status(404).json({ message: `Сотрудник с ID ${id} не найден` });
-            }
-
-            const participationResult = await pool.query(
-                'SELECT * FROM participation_chats WHERE id_group_chat = $1 AND id_employee = $2',
-                [chatId, id]
-            );
-
-            if (participationResult.rows.length === 0) { // Только если сотрудник ещё не участвует
-                validEmployeeIds.push(id);
-            }
+        // Проверяем, существует ли сотрудник
+        const employeeResult = await pool.query('SELECT * FROM employee WHERE id_employee = $1', [id_employee]);
+        if (employeeResult.rows.length === 0) {
+            return res.status(404).json({ message: 'Сотрудник не найден' });
         }
 
-        if (validEmployeeIds.length === 0) {
-            return res.status(400).json({ message: 'Все сотрудники уже участвуют в чате' });
+        // Проверяем, существует ли роль
+        const roleResult = await pool.query('SELECT * FROM roles WHERE id_role = $1', [id_role]);
+        if (roleResult.rows.length === 0) {
+            return res.status(404).json({ message: 'Роль не найдена' });
         }
 
-        // Добавляем сотрудников в чат
-        const insertPromises = validEmployeeIds.map(id => {
-            return pool.query(
-                'INSERT INTO participation_chats (id_group_chat, id_employee) VALUES ($1, $2)',
-                [chatId, id]
-            );
-        });
+        // Проверяем, не добавлен ли уже сотрудник в этот чат
+        const participationResult = await pool.query(
+            'SELECT * FROM participation_chats WHERE id_employee = $1 AND id_group_chat = $2',
+            [id_employee, id_group_chat]
+        );
+        if (participationResult.rows.length > 0) {
+            return res.status(400).json({ message: 'Сотрудник уже добавлен в этот чат' });
+        }
 
-        await Promise.all(insertPromises);
+        // Добавляем сотрудника в чат с выбранной ролью
+        await pool.query(
+            'INSERT INTO participation_chats (id_employee, id_role, id_group_chat) VALUES ($1, $2, $3)',
+            [id_employee, id_role, id_group_chat]
+        );
 
-        res.status(200).json({ message: 'Сотрудники успешно добавлены в чат', addedEmployeeIds: validEmployeeIds });
+        res.status(201).json({ message: 'Сотрудник успешно добавлен в чат' });
     } catch (err) {
         console.error(err);
-        res.status(500).send('Ошибка добавления сотрудников в чат');
+        res.status(500).send('Ошибка добавления сотрудника в чат');
+    }
+});
+app.get('/api/roles', authenticateToken, async (req, res) => {
+    if (!req.user.is_admin) {
+        return res.status(403).json({ message: 'Доступ только для администраторов' });
+    }
+    try {
+        const result = await pool.query('SELECT * FROM roles ORDER BY id_role ASC');
+        res.json(result.rows);
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Ошибка получения ролей');
     }
 });
 
@@ -682,7 +713,49 @@ app.post('/api/messages', authenticateToken, async (req, res) => {
     }
 });
 
+// Добавление сотрудников в чат (админ)
+app.post('/api/chats/:id_group_chat/add-members', authenticateToken, async (req, res) => {
+    if (!req.user.is_admin) {
+        return res.status(403).json({ message: 'Доступ только для администраторов' });
+    }
 
+    const { id_group_chat } = req.params;
+    const { employeeIds } = req.body;
+
+    if (!Array.isArray(employeeIds) || employeeIds.length === 0) {
+        return res.status(400).json({ message: 'Необходимы ID сотрудников для добавления' });
+    }
+
+    try {
+        // Получение ID роли "member", предположим, что роль уже существует
+        const roleResult = await pool.query(
+            `SELECT id_role FROM roles WHERE name = 'member' LIMIT 1`
+        );
+
+        if (roleResult.rows.length === 0) {
+            return res.status(500).json({ message: 'Роль "member" не найдена' });
+        }
+
+        const roleId = roleResult.rows[0].id_role;
+
+        // Вставка для каждого сотрудника, предотвращение дубликатов
+        const insertPromises = employeeIds.map(empId => 
+            pool.query(
+                `INSERT INTO participation_chats (id_employee, id_group_chat, id_role)
+                 VALUES ($1, $2, $3)
+                 ON CONFLICT (id_employee, id_group_chat) DO NOTHING`,
+                [empId, id_group_chat, roleId]
+            )
+        );
+
+        await Promise.all(insertPromises);
+
+        res.status(200).json({ message: 'Сотрудники успешно добавлены в чат' });
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Ошибка добавления сотрудников в чат');
+    }
+});
 
 // Получение личных сообщений с конкретным пользователем
 app.get('/api/messages/:userId', authenticateToken, async (req, res) => {
@@ -798,7 +871,16 @@ app.put('/api/events/:id', authenticateToken, async (req, res) => {
 });
 
 
-
+// Получение мероприятий на текущую дату
+app.get('/api/events/today', authenticateToken, async (req, res) => {
+    try {
+        const result = await pool.query('SELECT * FROM ListTodaysEvents()');
+        res.json(result.rows);
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Ошибка получения мероприятий на сегодня');
+    }
+});
 
 app.delete('/api/events/:id', authenticateToken, async (req, res) => {
     if (!req.user.is_admin) {
@@ -838,10 +920,7 @@ app.get('/api/event_locations', authenticateToken, async (req, res) => {
 // Получение активных объявлений
 app.get('/api/announcements/active', authenticateToken, async (req, res) => {
     try {
-        const result = await pool.qu
-
-
-ery('SELECT * FROM ListActiveAnnouncements()');
+        const result = await pool.query('SELECT * FROM ListActiveAnnouncements()');
         res.json(result.rows);
     } catch (err) {
         console.error(err);
@@ -908,32 +987,12 @@ app.get('/api/document_template', authenticateToken, async (req, res) => {
 
 
 
-// Получение количества непрочитанных уведомлений
-app.get('/api/messages/unread-count', authenticateToken, async (req, res) => {
-    try {
-        const result = await pool.query('SELECT * FROM CountUnreadMessagesPerEmployee() WHERE id_requester = $1', [req.user.id_employee]);
-        res.json(result.rows);
-    } catch (err) {
-        console.error(err);
-        res.status(500).send('Ошибка получения количества непрочитанных сообщений');
-    }
-});
-
 
 
 
 // Маршруты отчетов
 
-// 1. Отчет по сотрудникам
-app.get('/api/reports/employees', authenticateToken, async (req, res) => {
-    try {
-        const result = await pool.query(`SELECT * FROM generate_employee_position_document_report()`);
-        res.json(result.rows);
-    } catch (err) {
-        console.error(err);
-        res.status(500).send('Ошибка получения отчета по сотрудникам');
-    }
-});
+
 
 // 2. Отчет по уникальным навыкам
 app.get('/api/reports/unique-skills', authenticateToken, async (req, res) => {
@@ -993,20 +1052,6 @@ app.post('/api/reports/assign-role', authenticateToken, async (req, res) => {
     }
 });
 
-// 6. Уведомить о низких навыках
-app.post('/api/reports/notify-low-skills', authenticateToken, async (req, res) => {
-    if (!req.user.is_admin) {
-        return res.status(403).json({ message: 'Доступ только для администраторов' });
-    }
-    const { norm } = req.body; // Пороговый уровень навыка
-    try {
-        await pool.query(`SELECT notify_low_skill_levels($1)`, [norm]);
-        res.status(200).json({ message: 'Уведомления о низких навыках отправлены' });
-    } catch (err) {
-        console.error(err);
-        res.status(500).send('Ошибка отправки уведомлений о низких навыках');
-    }
-});
 
 
 // Получение всех уведомлений (админ)
@@ -1023,25 +1068,6 @@ app.get('/api/announcements/all', authenticateToken, async (req, res) => {
     }
 });
 
-// Создание нового уведомления (админ)
-app.post('/api/announcements', authenticateToken, async (req, res) => {
-    if (!req.user.is_admin) {
-        return res.status(403).json({ message: 'Доступ только для администраторов' });
-    }
-    const { title, discription, creation_date, end_date, id_employee } = req.body;
-    try {
-        const result = await pool.query(
-            `INSERT INTO announcements 
-             (title, discription, creation_date, end_date, id_employee) 
-             VALUES ($1, $2, $3, $4, $5) RETURNING *`,
-            [title, discription, creation_date, end_date, id_employee]
-        );
-        res.status(201).json(result.rows[0]);
-    } catch (err) {
-        console.error(err);
-        res.status(500).send('Ошибка создания уведомления');
-    }
-});
 
 // Обновление уведомления (админ)
 app.put('/api/announcements/:id', authenticateToken, async (req, res) => {
@@ -1098,25 +1124,7 @@ app.get('/api/messages/unread-count', authenticateToken, async (req, res) => {
 });
 
 
-// Создание нового уведомления (админ)
-app.post('/api/announcements', authenticateToken, async (req, res) => {
-    if (!req.user.is_admin) {
-        return res.status(403).json({ message: 'Доступ только для администраторов' });
-    }
-    const { title, discription, creation_date, end_date, id_employee } = req.body;
-    try {
-        const result = await pool.query(
-            `INSERT INTO announcements 
-             (title, discription, creation_date, end_date, id_employee) 
-             VALUES ($1, $2, $3, $4, $5) RETURNING *`,
-            [title, discription, creation_date, end_date, id_employee]
-        );
-        res.status(201).json(result.rows[0]);
-    } catch (err) {
-        console.error(err);
-        res.status(500).send('Ошибка создания уведомления');
-    }
-});
+
 
 // Обновление уведомления (админ)
 app.put('/api/announcements/:id', authenticateToken, async (req, res) => {
@@ -1159,6 +1167,212 @@ app.delete('/api/announcements/:id', authenticateToken, async (req, res) => {
         res.status(500).send('Ошибка удаления уведомления');
     }
 });
+
+// Получение всех должностей
+app.get('/api/positions', authenticateToken, async (req, res) => {
+    try {
+        const result = await pool.query(`
+            SELECT p.id_position, p.name AS position_name, p.appointment_date, 
+                   jt.name AS job_title, d.name AS department, o.office_number, 
+                   bc.address AS business_center_address
+            FROM position p
+            LEFT JOIN job_title jt ON p.id_job_title = jt.id_job_title
+            LEFT JOIN department d ON p.id_department = d.id_department
+            LEFT JOIN office o ON d.id_office = o.id_office
+            LEFT JOIN business_center bc ON o.id_business_center = bc.id_business_center
+            ORDER BY p.id_position ASC
+        `);
+        res.json(result.rows);
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Ошибка получения должностей');
+    }
+});
+
+
+
+// Создание объявления
+app.post('/api/announcements', authenticateToken, async (req, res) => {
+    if (!req.user.is_admin) {
+        return res.status(403).json({ message: 'Доступ только для администраторов' });
+    }
+    const { title, discription, creation_date, end_date } = req.body;
+    const id_employee = req.user.id_employee;
+    try {
+        await pool.query('SELECT create_announcement($1, $2, $3, $4, $5)', [
+            title, 
+            discription, 
+            creation_date, 
+            end_date, 
+            id_employee
+        ]);
+        res.status(201).json({ message: 'Объявление создано успешно' });
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Ошибка создания объявления');
+    }
+});
+
+// Отметка уведомления как прочитанного
+app.put('/api/notifications/:id', authenticateToken, async (req, res) => {
+    const userId = req.user.id_employee;
+    const notificationId = req.params.id;
+    try {
+        const result = await pool.query(
+            `UPDATE notifications 
+             SET is_read = TRUE 
+             WHERE id_notification = $1 AND id_employee = $2 
+             RETURNING *`,
+            [notificationId, userId]
+        );
+        if (result.rows.length === 0) {
+            return res.status(404).json({ message: 'Уведомление не найдено' });
+        }
+        res.json(result.rows[0]);
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Ошибка обновления уведомления');
+    }
+});
+
+
+// GET all notifications
+app.get('/api/notifications', authenticateToken, async (req, res) => {
+    try {
+      const result = await pool.query(`
+        SELECT 
+          n.id_notification,
+          n.id_employee,
+          e.full_name AS employee_name,
+          n.content,
+          n.created_at,
+          n.is_read
+        FROM notifications n
+        JOIN employee e ON n.id_employee = e.id_employee
+        ORDER BY n.created_at DESC
+      `);
+      res.json(result.rows);
+    } catch (err) {
+      console.error(err);
+      res.status(500).send('Ошибка получения уведомлений');
+    }
+  });
+  
+  // GET notifications for a specific employee
+  app.get('/api/notifications/employee/:employeeId', authenticateToken, async (req, res) => {
+    const { employeeId } = req.params;
+    try {
+      const result = await pool.query(`
+        SELECT 
+          id_notification,
+          content,
+          created_at,
+          is_read
+        FROM notifications
+        WHERE id_employee = $1
+        ORDER BY created_at DESC
+      `, [employeeId]);
+      res.json(result.rows);
+    } catch (err) {
+      console.error(err);
+      res.status(500).send('Ошибка получения уведомлений для сотрудника');
+    }
+  });
+  
+  // POST a new notification
+  app.post('/api/notifications', authenticateToken, async (req, res) => {
+    const { id_employee, content } = req.body;
+    try {
+      const result = await pool.query(`
+        INSERT INTO notifications (id_employee, content)
+        VALUES ($1, $2)
+        RETURNING *
+      `, [id_employee, content]);
+      res.status(201).json(result.rows[0]);
+    } catch (err) {
+      console.error(err);
+      res.status(500).send('Ошибка создания уведомления');
+    }
+  });
+  
+  // PUT to update a notification (e.g., mark as read)
+  app.put('/api/notifications/:id', authenticateToken, async (req, res) => {
+    const { id } = req.params;
+    const { content, is_read } = req.body;
+  
+    try {
+      const result = await pool.query(`
+        UPDATE notifications
+        SET content = COALESCE($1, content),
+            is_read = COALESCE($2, is_read),
+            created_at = created_at
+        WHERE id_notification = $3
+        RETURNING *
+      `, [content, is_read, id]);
+  
+      if (result.rows.length === 0) {
+        return res.status(404).send('Уведомление не найдено');
+      }
+  
+      res.json(result.rows[0]);
+    } catch (err) {
+      console.error(err);
+      res.status(500).send('Ошибка обновления уведомления');
+    }
+  });
+  
+  // DELETE a notification
+  app.delete('/api/notifications/:id', authenticateToken, async (req, res) => {
+    const { id } = req.params;
+    try {
+      const result = await pool.query(`
+        DELETE FROM notifications
+        WHERE id_notification = $1
+      RETURNING *
+    `, [id]);
+
+    if (result.rows.length === 0) {
+      return res.status(404).send('Уведомление не найдено');
+    }
+
+    res.json({ message: 'Уведомление удалено успешно' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Ошибка удаления уведомления');
+  }
+});
+
+// Пример исправления endpoint для отчета о непрочитанных сообщениях
+app.get('/api/reports/count-unread-messages', authenticateToken, async (req, res) => {
+    if (!req.user.is_admin) {
+        return res.status(403).json({ message: 'Доступ только для администраторов' });
+    }
+    try {
+        const result = await pool.query('SELECT * FROM countunreadmessagesperemployee()'); // Добавлено *
+        res.json(result.rows);
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Ошибка получения отчета о непрочитанных сообщениях');
+    }
+});
+
+
+
+
+// Получение активности объявления
+app.get('/api/announcements/active', authenticateToken, async (req, res) => {
+    try {
+        const result = await pool.query('SELECT * FROM listactiveannouncements()');
+        res.json(result.rows);
+    } catch (err) {
+        console.error('Ошибка получения активных объявлений:', err);
+        res.status(500).send('Ошибка получения объявлений');
+    }
+});
+
+
+
+
 
 // Запуск сервера
 const PORT = 5000;

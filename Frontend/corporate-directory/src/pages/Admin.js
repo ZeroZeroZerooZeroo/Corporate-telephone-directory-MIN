@@ -4,6 +4,7 @@ import AnnouncementsManagement from './admin/AnnouncementsManagement';
 import EventsManagement from './admin/EventsManagement';
 import ChatsManagement from './admin/ChatsManagement';
 import Reports from './admin/Reports';
+import ActualData from './admin/ActualData'; // Новый компонент
 
 function Admin() {
     const [activeTab, setActiveTab] = useState('employees');
@@ -20,6 +21,8 @@ function Admin() {
                 return <ChatsManagement />;
             case 'reports':
                 return <Reports />;
+            case 'actual':
+                return <ActualData />; // Новый компонент
             default:
                 return <EmployeesManagement />;
         }
@@ -59,6 +62,12 @@ function Admin() {
                 >
                     Отчеты
                 </button>
+                <button 
+                    onClick={() => setActiveTab('actual')} 
+                    style={activeTab === 'actual' ? styles.activeTab : styles.tab}
+                >
+                    Актуальное
+                </button>
             </div>
             <div style={styles.content}>
                 {renderTabContent()}
@@ -75,6 +84,7 @@ const styles = {
         display: 'flex',
         marginBottom: '20px',
         borderBottom: '1px solid #ccc',
+        flexWrap: 'wrap',
     },
     tab: {
         padding: '10px 20px',
@@ -84,6 +94,7 @@ const styles = {
         borderBottom: '2px solid transparent',
         outline: 'none',
         transition: 'background-color 0.3s',
+        marginRight: '5px',
     },
     activeTab: {
         padding: '10px 20px',
@@ -93,6 +104,7 @@ const styles = {
         outline: 'none',
         transition: 'background-color 0.3s',
         fontWeight: 'bold',
+        marginRight: '5px',
     },
     content: {
         padding: '20px',

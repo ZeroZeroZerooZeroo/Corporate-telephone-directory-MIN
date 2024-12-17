@@ -33,31 +33,7 @@ const deleteEmployee= (id) => {
     return axios.delete(`${API_URL}/employees/${id}`, { headers: getHeaders() });
 };
 
-// Отчеты
-const getEmployeesReport = () => {
-    return axios.get(`${API_URL}/reports/employees`, { headers: getHeaders() });
-};
 
-const getUniqueSkillsReport = () => {
-    return axios.get(`${API_URL}/reports/unique-skills`, { headers: getHeaders() });
-};
-
-const getEmployeesWithoutPhoneReport = () => {
-    return axios.get(`${API_URL}/reports/employees-without-phone`, { headers: getHeaders() });
-};
-
-// Уведомления и роли
-const notifyInactiveEmployees = (norm) => {
-    return axios.post(`${API_URL}/reports/notify-inactive`, { norm }, { headers: getHeaders() });
-};
-
-const assignRoleToEmployees = (norm, role) => {
-    return axios.post(`${API_URL}/reports/assign-role`, { norm, role }, { headers: getHeaders() });
-};
-
-const notifyLowSkillLevels = (norm) => {
-    return axios.post(`${API_URL}/reports/notify-low-skills`, { norm }, { headers: getHeaders() });
-};
 
 // Чаты
 const getChats = () => {
@@ -78,9 +54,7 @@ const markMessageAsRead = (id_message) => {
 
 // Документы
 
-const createDocument = (data) => {
-    return axios.post(`${API_URL}/documents`, data, { headers: getHeaders() });
-};
+
 
 // События
 const getEvents = () => {
@@ -88,9 +62,6 @@ const getEvents = () => {
 };
 
 // Объявления
-const getActiveAnnouncements = () => {
-    return axios.get(`${API_URL}/announcements/active`, { headers: getHeaders() });
-};
 
 const getAllAnnouncements = () => {
     return axios.get(`${API_URL}/announcements/all`, { headers: getHeaders() });
@@ -106,25 +77,7 @@ const getProfile = (id) => {
     return axios.get(`${API_URL}/profile/${id}`, { headers: getHeaders() });
 };
 
-// Офисы
-const getOffices = () => {
-    return axios.get(`${API_URL}/offices`, { headers: getHeaders() });
-};
 
-// Бизнес-центры
-const getBusinessCenters = () => {
-    return axios.get(`${API_URL}/business_centers`, { headers: getHeaders() });
-};
-
-// Отделы
-const getDepartments = () => {
-    return axios.get(`${API_URL}/departments`, { headers: getHeaders() });
-};
-
-// Должности
-const getPositions = () => {
-    return axios.get(`${API_URL}/positions`, { headers: getHeaders() });
-};
 
 const checkEmployeeActivity = () => {
     return axios.post(`${API_URL}/check_employee_activity`, {}, { headers: getHeaders() });
@@ -135,9 +88,7 @@ const getDocuments = () => {
     return axios.get(`${API_URL}/documents`, { headers: getHeaders() });
 };
 
-const updateDocument = (id, data) => {
-    return axios.put(`${API_URL}/documents/${id}`, data, { headers: getHeaders() });
-};
+
 
 const deleteDocument = (id) => {
     return axios.delete(`${API_URL}/documents/${id}`, { headers: getHeaders() });
@@ -200,11 +151,6 @@ const markPersonalMessageAsRead = (messageId) => {
     return axios.post(`${API_URL}/messages/${messageId}/read`, {}, { headers: getHeaders() });
 };
 
-// Получение событий на текущий день
-const getTodaysEvents = () => {
-    return axios.get(`${API_URL}/events/today`, { headers: getHeaders() });
-};
-
 // Объявления
 
 
@@ -221,22 +167,129 @@ const deleteAnnouncement = (id) => {
 };
 
 // Чаты
-const addEmployeesToChat = (chatId, employeeIds) => {
-    return axios.post(`/api/chats/${chatId}/add-employees`, { employeeIds }, { headers: getHeaders() });
+
+// Добавление сотрудников в чат
+
+
+
+const addUserToChat = (id_group_chat, id_employee, id_role) => {
+    return axios.post(`${API_URL}/chats/${id_group_chat}/add-user`, { id_employee, id_role }, { headers: getHeaders() });
+};
+
+const getRoles = () => {
+    return axios.get(`${API_URL}/roles`, { headers: getHeaders() });
 };
 
 
+// Добавляем методы для получения информации о компании
+const getOffices = () => {
+    return axios.get(`${API_URL}/offices`, { headers: getHeaders() });
+};
+
+const getBusinessCenters = () => {
+    return axios.get(`${API_URL}/business_centers`, { headers: getHeaders() });
+};
+
+const getDepartments = () => {
+    return axios.get(`${API_URL}/departments`, { headers: getHeaders() });
+};
+
+const getPositions = () => {
+    return axios.get(`${API_URL}/positions`, { headers: getHeaders() });
+};
+
+
+
+// Получение событий на текущий день
+const getTodaysEvents = () => {
+    return axios.get(`${API_URL}/events/today`, { headers: getHeaders() });
+};
+
+
+
+
+
+
+// Уведомления
+const getNotifications = () => {
+    return axios.get(`${API_URL}/notifications`, { headers: getHeaders() });
+};
+
+const markNotificationAsRead = (id) => {
+    return axios.put(`${API_URL}/notifications/${id}`, { is_read: true }, { headers: getHeaders() });
+};
+
+// Отчеты
+const getEmployeesReport = () => {
+    return axios.get(`${API_URL}/reports/employees`, { headers: getHeaders() });
+};
+
+const getUniqueSkillsReport = () => {
+    return axios.get(`${API_URL}/reports/unique-skills`, { headers: getHeaders() });
+};
+
+const getEmployeesWithoutPhoneReport = () => {
+    return axios.get(`${API_URL}/reports/employees-without-phone`, { headers: getHeaders() });
+};
+
+const notifyInactiveEmployees = (norm) => {
+    return axios.post(`${API_URL}/reports/notify-inactive`, { norm }, { headers: getHeaders() });
+};
+
+const assignRoleToEmployees = (norm, roleName) => {
+    return axios.post(`${API_URL}/reports/assign-role`, { norm, roleName }, { headers: getHeaders() });
+};
+
+const notifyLowSkillLevels = (norm) => {
+    return axios.post(`${API_URL}/reports/notify-low-skills`, { norm }, { headers: getHeaders() });
+};
+
+// Метод для загрузки документа с файлом
+
+
+// Методы для новых отчетов
+const getCountUnreadMessagesPerEmployee = () => {
+    return axios.get(`${API_URL}/reports/count-unread-messages`, { headers: getHeaders() });
+};
+
+const getListTodaysEvents = () => {
+    return axios.get(`${API_URL}/reports/list-todays-events`, { headers: getHeaders() });
+};
+
+const isAnnouncementActive = (id) => {
+    return axios.get(`${API_URL}/reports/is-announcement-active`, { headers: getHeaders() });
+};
+
+// Document creation and updation without file upload
+const createDocument = (data) => {
+    return axios.post(`${API_URL}/documents`, data, { headers: getHeaders() });
+};
+
+const updateDocument = (id, data) => {
+    return axios.put(`${API_URL}/documents/${id}`, data, { headers: getHeaders() });
+};
+
+const getActiveAnnouncements = () => {
+    return axios.get(`${API_URL}/announcements/active`, { headers: getHeaders() });
+};
+
 export default {
     getChats,
+    
     getMessages,
     sendMessage,
+    getCountUnreadMessagesPerEmployee,
+    getListTodaysEvents,
+    isAnnouncementActive,
     markMessageAsRead,
-    getTodaysEvents,            // Новый метод
-    
+    getTodaysEvents,
+    markNotificationAsRead,            
+    getRoles,
     createAnnouncement,
     updateAnnouncement,
     deleteAnnouncement,
-    addEmployeesToChat,
+    addUserToChat,
+    getNotifications,
     createDocument,
     getEvents,
     getActiveAnnouncements,
