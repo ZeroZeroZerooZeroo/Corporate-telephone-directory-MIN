@@ -45,7 +45,7 @@ function Notifications() {
 
     useEffect(() => {
         fetchNotifications();
-    }, [user]); // Перезапускаем при изменении пользователя
+    }, [user]); 
 
     const handleMarkAsRead = async (id) => {
         try {
@@ -65,10 +65,10 @@ function Notifications() {
 
         const interval = setInterval(() => {
             fetchNotifications();
-        }, 60000); // Обновление каждую минуту
+        }, 60000); 
 
         return () => clearInterval(interval);
-    }, [user]); // Перезапускаем интервал при изменении пользователя
+    }, [user]); 
 
     return (
         <div>

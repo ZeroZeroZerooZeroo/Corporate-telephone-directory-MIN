@@ -1,7 +1,7 @@
 .App {
   text-align: center;
-  background-color: #e8f5e9; /* Светло-зеленый фон */
-  color: #2e7d32; /* Темно-зеленый цвет текста */
+  background-color: #e8f5e9; 
+  color: #2e7d32; 
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -20,23 +20,23 @@
 }
 
 .App-header {
-  background-color: #a5d6a7; /* Более светлый оттенок зеленого для заголовка */
+  background-color: #a5d6a7;
   padding: 20px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   font-size: calc(10px + 2vmin);
-  color: #1b5e20; /* Темный оттенок зеленого для текста в заголовке */
+  color: #1b5e20; 
 }
 
 .App-link {
-  color: #66bb6a; /* Средний оттенок зеленого для ссылок */
+  color: #66bb6a; 
   text-decoration: none;
 }
 
 .App-link:hover {
-  color: #388e3c; /* Темнее зеленый при наведении */
+  color: #388e3c; 
 }
 
 @keyframes App-logo-spin {
@@ -48,9 +48,9 @@
   }
 }
 
-/* Стили для Navbar */
+
 .navbar {
-  background-color: #81c784; /* Светло-зеленый фон для навбара */
+  background-color: #81c784;
   padding: 10px 20px;
   display: flex;
   flex-wrap: wrap;
@@ -59,7 +59,7 @@
 }
 
 .navbar a {
-  color: #1b5e20; /* Темный зеленый для ссылок в навбаре */
+  color: #1b5e20; 
   margin: 0 10px;
   text-decoration: none;
   font-weight: bold;
@@ -69,8 +69,8 @@
 }
 
 .navbar a:hover {
-  color: #ffffff; /* Белый при наведении */
-  background-color: #2e7d32; /* Темный зеленый фон при наведении */
+  color: #ffffff;
+  background-color: #2e7d32; 
 }
 
 .navbar button {
@@ -87,12 +87,12 @@
   background-color: #c62828;
 }
 
-/* Стили для страниц */
+
 .page {
   padding: 20px;
   flex: 1;
 }
-/* Стили для кнопок */
+
 button {
   background-color: #66bb6a;
   color: white;
@@ -108,7 +108,7 @@ button:hover {
   background-color: #388e3c;
 }
 
-/* Форма */
+
 form {
   max-width: 500px;
   margin: 0 auto;
@@ -146,7 +146,7 @@ form button {
   margin-right: 10px;
 }
 
-/* Таблицы */
+
 table {
   width: 100%;
   border-collapse: collapse;
@@ -166,7 +166,7 @@ th {
   background-color: #a5d6a7;
 }
 
-/** Списки */
+
 ul {
   list-style-type: none;
   padding: 0;
@@ -185,7 +185,7 @@ li:hover {
   background-color: #f1f8e9;
 }
 
-/* Дополнительные стили */
+
 .section {
   margin-bottom: 30px;
 }

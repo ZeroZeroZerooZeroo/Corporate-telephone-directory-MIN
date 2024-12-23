@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import authService from '../services/authService';
-import apiService from '../services/apiService'; // Добавлен импорт apiService
+import apiService from '../services/apiService'; 
 
 function Navbar() {
     const [userData, setUserData] = useState(authService.getCurrentUser());
     const user = userData ? userData.user : null;
     const location = useLocation();
     const [unreadCount, setUnreadCount] = useState(0);
+
 
     useEffect(() => {
         const updatedUserData = authService.getCurrentUser();
@@ -19,6 +20,8 @@ function Navbar() {
         setUserData(null);
         window.location.reload();
     };
+
+    
 
     useEffect(() => {
         const fetchUnreadCount = async () => {
@@ -51,7 +54,7 @@ function Navbar() {
                         Уведомления 
                     </Link>
                     <Link to="/announcements" style={styles.link}>Объявления</Link>
-                    
+                    <Link to="/positions" style={styles.link}>Данные компании</Link>
                     {user.is_admin && (
                         <Link to="/admin" style={styles.link}>Админ</Link>
                     )}

@@ -22,7 +22,7 @@ function Reports() {
     const [showTodaysEventsReport, setShowTodaysEventsReport] = useState(false);
 
     useEffect(() => {
-        // Вы можете добавить автоматическую загрузку отчетов при загрузке компонента
+        
     }, []);
 
     const generateEmployeesReport = async () => {

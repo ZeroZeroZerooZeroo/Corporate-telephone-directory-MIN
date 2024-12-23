@@ -216,7 +216,7 @@ function EventsManagement() {
         <th>Описание</th>
         <th>Дата</th>
         <th>Местоположение</th>
-        <th>ID Сотрудника</th>
+        <th>Сотрудник</th>
         <th>Действия</th>
     </tr>
 </thead>
@@ -225,10 +225,10 @@ function EventsManagement() {
         <tr key={event.id_event}>
             <td>{event.id_event}</td>
             <td>{event.name}</td>
-            <td>{event.description}</td> {/* Исправлено с discription на description */}
+            <td>{event.discription}</td> {}
             <td>{new Date(event.date).toLocaleDateString()}</td>
             <td>{event.event_location_name || 'Не указано'}</td>
-            <td>{event.id_employee}</td>
+            <td>{event.creator_name}</td>
             <td>
                 <button onClick={() => handleEdit(event)} style={styles.editButton}>
                     Редактировать

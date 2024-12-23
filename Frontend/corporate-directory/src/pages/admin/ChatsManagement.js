@@ -20,7 +20,17 @@ function ChatsManagement() {
     const fetchChats = async () => {
         try {
             const response = await apiService.getChats();
-            setChats(response.data);
+            const uniqueChats = [];
+            const chatIds = new Set();
+    
+            response.data.forEach(chat => {
+                if (!chatIds.has(chat.id_group_chat)) {
+                    chatIds.add(chat.id_group_chat);
+                    uniqueChats.push(chat);
+                }
+            });
+    
+            setChats(uniqueChats);
         } catch (err) {
             console.error(err);
             setError('Ошибка получения чатов');
@@ -58,7 +68,7 @@ function ChatsManagement() {
             setMessage('Сотрудник успешно добавлен в чат');
             setSelectedEmployee('');
             setSelectedRole('');
-            fetchChats(); // Обновляем список чатов, если необходимо
+            fetchChats(); // Обновляем список чатов
         } catch (err) {
             console.error(err);
             setError(err.response?.data?.message || 'Ошибка добавления сотрудника в чат');

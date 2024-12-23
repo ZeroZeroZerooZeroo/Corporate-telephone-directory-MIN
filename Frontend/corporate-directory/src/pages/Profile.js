@@ -36,7 +36,7 @@ function Profile() {
         checkActivity();
     }, []);
 
-    // Функция для безопасного форматирования даты
+    
     const formatDate = (dateString) => {
         if (!dateString) return 'Не указано';
         const date = new Date(dateString);
@@ -50,7 +50,7 @@ function Profile() {
     if (error) return <p style={{ color: 'red' }}>{error}</p>;
     if (!profile) return <p>Загрузка...</p>;
 
-    // Предполагается, что profile включает employee, position и skills
+    
     const employee = profile.employee;
     const position = profile.position || null; // Если позиция не приходит с сервера, устанавливаем значение по умолчанию
     const skills = profile.skills || [];       // Если навыки не приходят, устанавливаем пустой массив

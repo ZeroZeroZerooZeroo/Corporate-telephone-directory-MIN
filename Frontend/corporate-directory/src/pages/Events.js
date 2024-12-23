@@ -4,7 +4,7 @@ import apiService from '../services/apiService';
 function Events() {
     const [events, setEvents] = useState([]);
     const [eventLocations, setEventLocations] = useState([]);
-    const [employees, setEmployees] = useState([]); // Для выбора создателя
+    const [employees, setEmployees] = useState([]); 
     const [error, setError] = useState('');
     const [message, setMessage] = useState('');
     const [showAddForm, setShowAddForm] = useState(false);
@@ -27,7 +27,7 @@ function Events() {
     const fetchEvents = async () => {
         try {
             const response = await apiService.getEvents();
-            console.log('Events:', response.data); // Логирование для отладки
+            console.log('Events:', response.data); 
             setEvents(response.data);
         } catch (err) {
             console.error(err);
@@ -47,7 +47,7 @@ function Events() {
 
     const fetchEmployees = async () => {
         try {
-            const response = await apiService.getEmployees(); // Предполагается, что этот маршрут доступен
+            const response = await apiService.getEmployees();
             setEmployees(response.data);
         } catch (err) {
             console.error(err);
@@ -120,8 +120,8 @@ function Events() {
         e.preventDefault();
         try {
             const data = { ...formData };
-            data.id_event_location = parseInt(data.id_event_location); // Исправлено
-            data.id_employee = parseInt(data.id_employee); // Убедитесь, что это правильно
+            data.id_event_location = parseInt(data.id_event_location); 
+            data.id_employee = parseInt(data.id_employee); 
             await apiService.updateEvent(currentEvent.id_event, data);
             setShowEditForm(false);
             fetchEvents();

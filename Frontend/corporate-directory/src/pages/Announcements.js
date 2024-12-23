@@ -3,6 +3,7 @@ import apiService from '../services/apiService';
 
 function Announcements() {
     const [announcements, setAnnouncements] = useState([]);
+    const [employees, setEmployees] = useState([]); 
     const [error, setError] = useState('');
     const [showAddForm, setShowAddForm] = useState(false);
     const [showEditForm, setShowEditForm] = useState(false);
@@ -18,6 +19,7 @@ function Announcements() {
 
     useEffect(() => {
         fetchAnnouncements();
+        fetchEmployees(); 
     }, []);
 
     const fetchAnnouncements = async () => {
@@ -27,6 +29,16 @@ function Announcements() {
         } catch (err) {
             console.error(err);
             setError('Ошибка получения объявлений');
+        }
+    };
+
+    const fetchEmployees = async () => {
+        try {
+            const response = await apiService.getEmployees(); 
+            setEmployees(response.data);
+        } catch (err) {
+            console.error(err);
+            setError('Ошибка получения списка сотрудников');
         }
     };
 
@@ -116,151 +128,166 @@ function Announcements() {
 
             {/* Форма добавления объявления */}
             {showAddForm && (
-                <form onSubmit={handleAddSubmit} style={styles.form}>
-                    <h4>Создать объявление</h4>
-                    <div>
-                        <label>Название:</label>
-                        <input
-                            type="text"
-                            name="title"
-                            value={formData.title}
-                            onChange={handleFormChange}
-                            required
-                        />
-                    </div>
-                    <div>
-                        <label>Описание:</label>
-                        <textarea
-                            name="discription"
-                            value={formData.discription}
-                            onChange={handleFormChange}
-                            required
-                        />
-                    </div>
-                    <div>
-                        <label>Дата создания:</label>
-                        <input
-                            type="date"
-                            name="creation_date"
-                            value={formData.creation_date}
-                            onChange={handleFormChange}
-                            required
-                        />
-                    </div>
-                    <div>
-                        <label>Дата окончания:</label>
-                        <input
-                            type="date"
-                            name="end_date"
-                            value={formData.end_date}
-                            onChange={handleFormChange}
-                            required
-                        />
-                    </div>
-                    <div>
-                        <label>Создатель объявления (ID):</label>
-                        <input
-                            type="number"
-                            name="id_employee"
-                            value={formData.id_employee}
-                            onChange={handleFormChange}
-                            required
-                        />
-                    </div>
-                    <button type="submit" style={{ ...styles.button, backgroundColor: '#007bff' }}>Создать</button>
-                    <button type="button" onClick={() => setShowAddForm(false)} style={{ ...styles.button, backgroundColor: '#6c757d' }}>Отмена</button>
-                </form>
-            )}
+        <form onSubmit={handleAddSubmit} style={styles.form}>
+            <h4>Создать объявление</h4>
+            <div>
+                <label>Название:</label>
+                <input
+                    type="text"
+                    name="title"
+                    value={formData.title}
+                    onChange={handleFormChange}
+                    required
+                />
+            </div>
+            <div>
+                <label>Описание:</label>
+                <textarea
+                    name="discription"
+                    value={formData.discription}
+                    onChange={handleFormChange}
+                    required
+                />
+            </div>
+            <div>
+                <label>Дата создания:</label>
+                <input
+                    type="date"
+                    name="creation_date"
+                    value={formData.creation_date}
+                    onChange={handleFormChange}
+                    required
+                />
+            </div>
+            <div>
+                <label>Дата окончания:</label>
+                <input
+                    type="date"
+                    name="end_date"
+                    value={formData.end_date}
+                    onChange={handleFormChange}
+                    required
+                />
+            </div>
+            <div>
+            <label>Создатель объявления:</label>
+                <select
+                    name="id_employee"
+                    value={formData.id_employee}
+                    onChange={handleFormChange}
+                    required
+                >
+                    <option value="">--Выберите создателя--</option>
+                    {employees.map(emp => (
+                        <option key={emp.id_employee} value={emp.id_employee}>
+                            {emp.full_name}
+                        </option>
+                    ))}
+                </select>
+            </div>
+            <button type="submit" style={{ ...styles.button, backgroundColor: '#007bff' }}>Создать</button>
+            <button type="button" onClick={() => setShowAddForm(false)} style={{ ...styles.button, backgroundColor: '#6c757d' }}>Отмена</button>
+        </form>
+    )}
 
-            {/* Форма редактирования объявления */}
-            {showEditForm && currentAnnouncement && (
-                <form onSubmit={handleEditSubmit} style={styles.form}>
-                    <h4>Редактировать объявление</h4>
-                    <div>
-                        <label>Название:</label>
-                        <input
-                            type="text"
-                            name="title"
-                            value={formData.title}
-                            onChange={handleFormChange}
-                            required
-                        />
-                    </div>
-                    <div>
-                        <label>Описание:</label>
-                        <textarea
-                            name="discription"
-                            value={formData.discription}
-                            onChange={handleFormChange}
-                            required
-                        />
-                    </div>
-                    <div>
-                        <label>Дата создания:</label>
-                        <input
-                            type="date"
-                            name="creation_date"
-                            value={formData.creation_date}
-                            onChange={handleFormChange}
-                            required
-                        />
-                    </div>
-                    <div>
-                        <label>Дата окончания:</label>
-                        <input
-                            type="date"
-                            name="end_date"
-                            value={formData.end_date}
-                            onChange={handleFormChange}
-                            required
-                        />
-                    </div>
-                    <div>
-                        <label>Создатель объявления (ID):</label>
-                        <input
-                            type="number"
-                            name="id_employee"
-                            value={formData.id_employee}
-                            onChange={handleFormChange}
-                            required
-                        />
-                    </div>
-                    <button type="submit" style={{ ...styles.button, backgroundColor: '#007bff' }}>Обновить</button>
-                    <button type="button" onClick={() => setShowEditForm(false)} style={{ ...styles.button, backgroundColor: '#6c757d' }}>Отмена</button>
-                </form>
-            )}
+    {/* Форма редактирования объявления */}
+    {showEditForm && currentAnnouncement && (
+        <form onSubmit={handleEditSubmit} style={styles.form}>
+            <h4>Редактировать объявление</h4>
+            <div>
+                <label>Название:</label>
+                <input
+                    type="text"
+                    name="title"
+                    value={formData.title}
+                    onChange={handleFormChange}
+                    required
+                />
+            </div>
+            <div>
+                <label>Описание:</label>
+                <textarea
+                    name="discription"
+                    value={formData.discription}
+                    onChange={handleFormChange}
+                    required
+                />
+            </div>
+            <div>
+                <label>Дата создания:</label>
+                <input
+                    type="date"
+                    name="creation_date"
+                    value={formData.creation_date}
+                    onChange={handleFormChange}
+                    required
+                />
+            </div>
+            <div>
+                <label>Дата окончания:</label>
+                <input
+                    type="date"
+                    name="end_date"
+                    value={formData.end_date}
+                    onChange={handleFormChange}
+                    required
+                />
+            </div>
+            <div>
+                <label>Создатель объявления:</label>
+                <select
+                    name="id_employee"
+                    value={formData.id_employee}
+                    onChange={handleFormChange}
+                    required
+                >
+                    <option value="">--Выберите создателя--</option>
+                    {employees.map(emp => (
+                        <option key={emp.id_employee} value={emp.id_employee}>
+                            {emp.full_name}
+                        </option>
+                    ))}
+                </select>
+            </div>
+            <button type="submit" style={{ ...styles.button, backgroundColor: '#007bff' }}>Обновить</button>
+            <button type="button" onClick={() => setShowEditForm(false)} style={{ ...styles.button, backgroundColor: '#6c757d' }}>Отмена</button>
+        </form>
+    )}
 
+           
             {/* Список объявлений */}
             <h4>Список объявлений</h4>
-            <table>
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Название</th>
-                        <th>Описание</th>
-                        <th>Дата создания</th>
-                        <th>Дата окончания</th>
-                        <th>Создатель (ID)</th>
-                        <th>Действия</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {announcements.map(ann => (
-                        <tr key={ann.id_announcement}>
-                            <td>{ann.id_announcement}</td>
-                            <td>{ann.title}</td>
-                            <td>{ann.discription}</td>
-                            <td>{new Date(ann.creation_date).toLocaleDateString()}</td>
-                            <td>{new Date(ann.end_date).toLocaleDateString()}</td>
-                            <td>{ann.id_employee}</td>
-                            <td>
-                                <button onClick={() => handleEdit(ann)} style={{ ...styles.button, backgroundColor: '#ffc107' }}>Редактировать</button>
-                                <button onClick={() => handleDelete(ann.id_announcement)} style={{ ...styles.button, backgroundColor: '#dc3545' }}>Удалить</button>
-                            </td>
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Название</th>
+                <th>Описание</th>
+                <th>Дата создания</th>
+                <th>Дата окончания</th>
+                <th>Создатель</th>
+                <th>Действия</th>
+            </tr>
+        </thead>
+        <tbody>
+            {announcements.map(ann => {
+                const creator = employees.find(emp => emp.id_employee === ann.id_employee);
+                return (<tr key={ann.id_announcement}>
+                    <td>{ann.id_announcement}</td>
+                    <td>{ann.title}</td>
+                    <td>{ann.discription}</td>
+                    <td>{new Date(ann.creation_date).toLocaleDateString()}</td>
+                    <td>{new Date(ann.end_date).toLocaleDateString()}</td>
+                    <td>{creator ? creator.full_name : 'Не указано'}</td>
+                    <td>
+                        <button onClick={() => handleEdit(ann)} style={{ ...styles.button, backgroundColor: '#ffc107' }}>Редактировать</button>
+                        <button onClick={() => handleDelete(ann.id_announcement)} style={{ ...styles.button, backgroundColor: '#dc3545' }}>Удалить</button>
+                    </td>
+                </tr>
+            );
+        })}
+    </tbody>
+</table>
         </div>
     );
 }

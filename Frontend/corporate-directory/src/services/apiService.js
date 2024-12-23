@@ -83,7 +83,7 @@ const checkEmployeeActivity = () => {
     return axios.post(`${API_URL}/check_employee_activity`, {}, { headers: getHeaders() });
 };
 
-// Documents (CRUD)
+
 const getDocuments = () => {
     return axios.get(`${API_URL}/documents`, { headers: getHeaders() });
 };
@@ -94,7 +94,6 @@ const deleteDocument = (id) => {
     return axios.delete(`${API_URL}/documents/${id}`, { headers: getHeaders() });
 };
 
-// Business Cards (CRUD)
 const getBusinessCards = () => {
     return axios.get(`${API_URL}/business_cards`, { headers: getHeaders() });
 };
@@ -111,7 +110,7 @@ const deleteBusinessCard = (id) => {
     return axios.delete(`${API_URL}/business_cards/${id}`, { headers: getHeaders() });
 };
 
-// Events (CRUD)
+
 
 const getCardTypes = () => {
     return axios.get(`${API_URL}/card_types`, { headers: getHeaders() });
@@ -133,7 +132,7 @@ const deleteEvent = (id) => {
     return axios.delete(`${API_URL}/events/${id}`, { headers: getHeaders() });
 };
 
-// Event Locations
+
 const getEventLocations = () => {
     return axios.get(`${API_URL}/event_locations`, { headers: getHeaders() });
 };
@@ -181,7 +180,7 @@ const getRoles = () => {
 };
 
 
-// Добавляем методы для получения информации о компании
+// методы для получения информации о компании
 const getOffices = () => {
     return axios.get(`${API_URL}/offices`, { headers: getHeaders() });
 };
@@ -244,10 +243,10 @@ const notifyLowSkillLevels = (norm) => {
     return axios.post(`${API_URL}/reports/notify-low-skills`, { norm }, { headers: getHeaders() });
 };
 
-// Метод для загрузки документа с файлом
 
 
-// Методы для новых отчетов
+
+// Методы для отчетов
 const getCountUnreadMessagesPerEmployee = () => {
     return axios.get(`${API_URL}/reports/count-unread-messages`, { headers: getHeaders() });
 };
@@ -260,7 +259,7 @@ const isAnnouncementActive = (id) => {
     return axios.get(`${API_URL}/reports/is-announcement-active`, { headers: getHeaders() });
 };
 
-// Document creation and updation without file upload
+
 const createDocument = (data) => {
     return axios.post(`${API_URL}/documents`, data, { headers: getHeaders() });
 };
@@ -273,9 +272,32 @@ const getActiveAnnouncements = () => {
     return axios.get(`${API_URL}/announcements/active`, { headers: getHeaders() });
 };
 
+// Получение всех должностей
+const getJobTitles = () => {
+    return axios.get(`${API_URL}/job_titles`, { headers: getHeaders() });
+};
+
+
+
+// Получение всех навыков
+const getSkills = () => {
+    return axios.get(`${API_URL}/skills`, { headers: getHeaders() });
+};
+
+// Получение всех уровней навыков
+const getLevels = () => {
+    return axios.get(`${API_URL}/levels`, { headers: getHeaders() });
+};
+
+
+
 export default {
     getChats,
+    getJobTitles,
     
+    
+    getSkills,
+    getLevels,
     getMessages,
     sendMessage,
     getCountUnreadMessagesPerEmployee,
@@ -324,7 +346,7 @@ export default {
     getEventLocations,
     getDocumentTemplate,
 
-    // Новые методы для отчетов
+
     getEmployeesReport,
     getUniqueSkillsReport,
     getEmployeesWithoutPhoneReport,

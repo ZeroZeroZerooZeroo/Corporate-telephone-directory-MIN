@@ -4,7 +4,7 @@ import AnnouncementsManagement from './admin/AnnouncementsManagement';
 import EventsManagement from './admin/EventsManagement';
 import ChatsManagement from './admin/ChatsManagement';
 import Reports from './admin/Reports';
-import ActualData from './admin/ActualData'; // Новый компонент
+import ActualData from './admin/ActualData'; 
 
 function Admin() {
     const [activeTab, setActiveTab] = useState('employees');
@@ -22,7 +22,7 @@ function Admin() {
             case 'reports':
                 return <Reports />;
             case 'actual':
-                return <ActualData />; // Новый компонент
+                return <ActualData />; 
             default:
                 return <EmployeesManagement />;
         }

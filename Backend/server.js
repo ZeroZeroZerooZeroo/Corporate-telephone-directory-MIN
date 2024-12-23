@@ -106,10 +106,7 @@ app.post('/api/login', async (req, res) => {
 app.get('/api/profile/:id', authenticateToken, async (req, res) => {
     const { id } = req.params;
 
-    /*if (parseInt(id) !== req.user.id_employee && !req.user.is_admin) {
-        return res.status(403).json({ message: 'Доступ запрещен' });
-    }*/
-
+   
     try {
         const employeeResult = await pool.query('SELECT * FROM employee WHERE id_employee = $1', [id]);
         if (employeeResult.rows.length === 0) {
@@ -178,8 +175,9 @@ app.get('/api/business_centers', authenticateToken, async (req, res) => {
     }
 });
 
-// Получение всех отделов
-app.get('/api/departments', authenticateToken, async (req, res) => {
+
+  // Получение всех отделов
+  app.get('/api/departments', authenticateToken, async (req, res) => {
     try {
         const result = await pool.query(`
             SELECT d.id_department, d.name AS department_name, d.open_hours, d.close_hours, 
@@ -187,8 +185,8 @@ app.get('/api/departments', authenticateToken, async (req, res) => {
             FROM department d
             LEFT JOIN office o ON d.id_office = o.id_office
             LEFT JOIN business_center bc ON o.id_business_center = bc.id_business_center
-            ORDER BY d.id_department ASC
-        `);
+            ORDER BY d.id_department ASC`
+        );
         res.json(result.rows);
     } catch (err) {
         console.error(err);
@@ -196,84 +194,85 @@ app.get('/api/departments', authenticateToken, async (req, res) => {
     }
 });
 
-// Получение всех должностей
-app.get('/api/positions', authenticateToken, async (req, res) => {
+
+
+ // Получение всех должностей
+ app.get('/api/job_titles', authenticateToken, async (req, res) => {
     try {
-        const result = await pool.query(`
-            SELECT p.id_position, p.name AS position_name, p.appointment_date, 
-                   jt.name AS job_title, d.name AS department, o.office_number, 
-                   bc.address AS business_center_address
-            FROM position pLEFT JOIN job_title jt ON p.id_job_title = jt.id_job_title
-            LEFT JOIN department d ON p.id_department = d.id_department
-            LEFT JOIN office o ON d.id_office = o.id_office
-            LEFT JOIN business_center bc ON o.id_business_center = bc.id_business_center
-            ORDER BY p.id_position ASC
-        `);
+        const result = await pool.query('SELECT id_job_title, name FROM job_title ORDER BY id_job_title ASC');
         res.json(result.rows);
     } catch (err) {
         console.error(err);
         res.status(500).send('Ошибка получения должностей');
     }
 });
-
-// Получение всех сотрудников (для админов)
+// Получение всех сотрудников 
 app.get('/api/employees', authenticateToken, async (req, res) => {
-   
-
     try {
-        const result = await pool.query('SELECT * FROM employee ORDER BY id_employee ASC');
-        res.json(result.rows);
+        const result = await pool.query(`
+            SELECT 
+    e.id_employee,
+    e.full_name,
+    e.email,
+    e.phone_number,
+    e.employment_date,
+    e.is_admin,
+    p.id_position,
+    p.appointment_date,
+    jt.name AS job_title,
+    d.name AS department,
+    bc.address AS business_center,
+    sn.name AS skill_name,
+    ls.level AS skill_level
+FROM employee e
+LEFT JOIN position p ON e.id_employee = p.id_employee
+LEFT JOIN job_title jt ON p.id_job_title = jt.id_job_title
+LEFT JOIN department d ON p.id_department = d.id_department
+LEFT JOIN office o ON d.id_office = o.id_office
+LEFT JOIN business_center bc ON o.id_business_center = bc.id_business_center
+LEFT JOIN skill_own so ON e.id_employee = so.id_employee
+LEFT JOIN skill_name sn ON so.id_skill_name = sn.id_skill_name
+LEFT JOIN level_skill ls ON so.id_level_skill = ls.id_level_skill
+ORDER BY e.id_employee ASC
+        `);
+        
+       
+        const employeesMap = new Map();
+        result.rows.forEach(row => {
+            if (!employeesMap.has(row.id_employee)) {
+                employeesMap.set(row.id_employee, {
+                    id_employee: row.id_employee,
+                    full_name: row.full_name,
+                    email: row.email,
+                    phone_number: row.phone_number,
+                    employment_date: row.employment_date,
+                    is_admin: row.is_admin,
+                    id_position: row.id_position,
+                    appointment_date: row.appointment_date,
+                    job_title: row.job_title,
+                    department: row.department,
+                    business_center: row.business_center,
+                    skills: []
+                });
+            }
+            if (row.skill_name && row.skill_level) {
+                employeesMap.get(row.id_employee).skills.push({
+                    skill_name: row.skill_name,
+                    skill_level: row.skill_level
+                });
+            }
+        });
+
+        const employees = Array.from(employeesMap.values());
+
+        res.json(employees);
     } catch (err) {
         console.error(err);
         res.status(500).send('Ошибка получения сотрудников');
     }
 });
 
-// Добавление сотрудника (админ)
-app.post('/api/employees', authenticateToken, async (req, res) => {
-    if (!req.user.is_admin) {
-        return res.status(403).json({ message: 'Доступ только для администраторов' });
-    }
 
-    const { full_name, email, phone_number, employment_date, is_admin, password } = req.body;
-    try {
-        const result = await pool.query(
-            'INSERT INTO employee (full_name, email, phone_number, employment_date, is_admin, password) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *',
-            [full_name, email, phone_number, employment_date, is_admin, password]
-        );
-        res.json(result.rows[0]);
-    } catch (err) {
-        console.error(err);
-        res.status(500).send('Ошибка добавления сотрудника');
-    }
-});
-
-
-
-
-
-// Обновление сотрудника (админ)
-app.put('/api/employees/:id', authenticateToken, async (req, res) => {
-    if (!req.user.is_admin) {
-        return res.status(403).json({ message: 'Доступ только для администраторов' });
-    }
-
-    const { id } = req.params;
-    const { full_name, email, phone_number, employment_date, is_admin, password } = req.body;
-    try {
-        const result = await pool.query(
-            'UPDATE employee SET full_name = $1, email = $2, phone_number = $3, employment_date = $4, is_admin = $5, password = $6 WHERE id_employee = $7 RETURNING *',
-            [full_name, email, phone_number, employment_date, is_admin, password, id]
-        );
-        if (result.rows.length === 0) {
-            return res.status(404).json({ message: 'Сотрудник не найден' });
-        }
-        res.json(result.rows[0]);
-    } catch (err) {
-        console.error(err);
-        res.status(500).send('Ошибка обновления сотрудника');
-    }
-});
 
 // Удаление сотрудника (админ)
 app.delete('/api/employees/:id', authenticateToken, async (req, res) => {
@@ -291,6 +290,252 @@ app.delete('/api/employees/:id', authenticateToken, async (req, res) => {
     } catch (err) {
         console.error(err);
         res.status(500).send('Ошибка удаления сотрудника');
+    }
+});
+// Добавление сотрудника (админ) с должностью и навыками
+app.post('/api/employees', authenticateToken, async (req, res) => {
+    if (!req.user.is_admin) {
+        return res.status(403).json({ message: 'Доступ только для администраторов' });
+    }
+
+    const { full_name, email, phone_number, employment_date, is_admin, password, position_id, appointment_date, department_id, skills } = req.body;
+    try {
+        const client = await pool.connect();
+        try {
+            await client.query('BEGIN');
+            // Проверка существования email
+            const existingUser = await client.query('SELECT * FROM employee WHERE email = $1', [email]);
+            if (existingUser.rows.length > 0) {
+                await client.query('ROLLBACK');
+                return res.status(400).json({ message: 'Пользователь с таким email уже существует' });
+            }
+
+            // Добавляем сотрудника
+            const result = await client.query(
+                'INSERT INTO employee (full_name, email, phone_number, employment_date, is_admin, password) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *',
+                [full_name, email, phone_number, employment_date, is_admin, password]
+            );
+            const employee = result.rows[0];
+
+            // Получаем название должности из job_title
+            const jobTitleResult = await client.query(
+                'SELECT name FROM job_title WHERE id_job_title = $1',
+                [position_id]
+            );
+            if (jobTitleResult.rows.length === 0) {
+                await client.query('ROLLBACK');
+                return res.status(400).json({ message: 'Должность не найдена' });
+            }
+            const jobTitleName = jobTitleResult.rows[0].name;
+
+            // Присваиваем должность
+            if (position_id && department_id && appointment_date) {
+                await client.query(
+                    'INSERT INTO position (appointment_date, id_employee, id_job_title, id_department) VALUES ($1, $2, $3, $4)',
+                    [appointment_date, employee.id_employee, position_id, department_id]
+                );
+            } else {
+                await client.query('ROLLBACK');
+                return res.status(400).json({ message: 'Необходимые данные для должности отсутствуют' });
+            }
+
+            // Добавляем навыки
+            if (skills && Array.isArray(skills)) {
+                for (const skill of skills) {
+                    await client.query(
+                        'INSERT INTO skill_own (id_employee, id_skill_name, id_level_skill, last_check) VALUES ($1, $2, $3, CURRENT_TIMESTAMP);',
+                        [employee.id_employee, skill.id_skill_name, skill.id_level_skill]
+                    );
+                }
+            }
+
+            await client.query('COMMIT');
+            res.status(201).json(employee);
+        } catch (err) {
+            await client.query('ROLLBACK');
+            console.error('Ошибка транзакции при добавлении сотрудника:', err);
+            res.status(500).send('Ошибка добавления сотрудника');
+        } finally {
+            client.release();
+        }
+    } catch (err) {
+        console.error('Ошибка подключения к базе данных:', err);
+        res.status(500).send('Ошибка добавления сотрудника');
+    }
+});
+
+// Получение всех навыков
+app.get('/api/skills', authenticateToken, async (req, res) => {
+    try {
+        const result = await pool.query('SELECT id_skill_name, name FROM skill_name ORDER BY id_skill_name ASC');
+        res.json(result.rows);
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Ошибка получения навыков');
+    }
+});
+
+// Добавление навыков сотруднику
+app.post('/api/employees', authenticateToken, async (req, res) => {
+    if (!req.user.is_admin) {
+        return res.status(403).json({ message: 'Доступ только для администраторов' });
+    }
+
+    const { full_name, email, phone_number, employment_date, is_admin, password, position_id, appointment_date, department_id, skills } = req.body;
+    try {
+        const client = await pool.connect();
+        try {
+            await client.query('BEGIN');
+            // Проверка существования email
+            const existingUser = await client.query('SELECT * FROM employee WHERE email = $1', [email]);
+            if (existingUser.rows.length > 0) {
+                await client.query('ROLLBACK');
+                return res.status(400).json({ message: 'Пользователь с таким email уже существует' });
+            }
+
+            // Добавляем сотрудника
+            const result = await client.query(
+                'INSERT INTO employee (full_name, email, phone_number, employment_date, is_admin, password) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *',
+                [full_name, email, phone_number, employment_date, is_admin, password]
+            );
+            const employee = result.rows[0];
+
+            // Присваиваем должность
+            if (position_id && department_id && appointment_date) {
+                await client.query(
+                    'INSERT INTO position (appointment_date, id_employee, id_job_title, id_department) VALUES ($1, $2, $3, $4)',
+                    [appointment_date, employee.id_employee, position_id, department_id]
+                );
+            } else {
+                await client.query('ROLLBACK');
+                return res.status(400).json({ message: 'Необходимые данные для должности отсутствуют' });
+            }
+
+            // Добавляем навыки
+            if (skills && Array.isArray(skills)) {
+                for (const skill of skills) {
+                    await client.query(
+                        'INSERT INTO skill_own (id_employee, id_skill_name, id_level_skill, last_check) VALUES ($1, $2, $3, CURRENT_TIMESTAMP);',
+                        [employee.id_employee, skill.id_skill_name, skill.id_level_skill]
+                    );
+                }
+            }
+
+            await client.query('COMMIT');
+            res.status(201).json(employee);
+        } catch (err) {
+            await client.query('ROLLBACK');
+            throw err;
+        } finally {
+            client.release();
+        }
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Ошибка добавления сотрудника');
+    }
+});
+
+// Обновление сотрудника (админ)
+app.put('/api/employees/:id', authenticateToken, async (req, res) => {
+    if (!req.user.is_admin) {
+        return res.status(403).json({ message: 'Доступ только для администраторов' });
+    }
+
+    const { id } = req.params;
+    const { full_name, email, phone_number, employment_date, is_admin, password, position_id, appointment_date, department_id, skills } = req.body;
+
+    try {
+        const client = await pool.connect();
+        try {
+            await client.query('BEGIN');
+
+            // Проверка существования email (если изменяется)
+            if (email) {
+                const existingUser = await client.query(
+                    'SELECT * FROM employee WHERE email = $1 AND id_employee != $2',
+                    [email, id]
+                );
+                if (existingUser.rows.length > 0) {
+                    await client.query('ROLLBACK');
+                    return res.status(400).json({ message: 'Пользователь с таким email уже существует' });
+                }
+            }
+
+            // Обновляем основные данные сотрудника
+            const updateEmployeeQuery = `
+                UPDATE employee 
+                SET 
+                    full_name = COALESCE($1, full_name),
+                    email = COALESCE($2, email),
+                    phone_number = COALESCE($3, phone_number),
+                    employment_date = COALESCE($4, employment_date),
+                    is_admin = COALESCE($5, is_admin),
+                    password = COALESCE($6, password)
+                WHERE id_employee = $7
+                RETURNING *
+            `;
+            const updateEmployeeValues = [full_name, email, phone_number, employment_date, is_admin, password, id];
+            const employeeResult = await client.query(updateEmployeeQuery, updateEmployeeValues);
+
+            if (employeeResult.rows.length === 0) {
+                await client.query('ROLLBACK');
+                return res.status(404).json({ message: 'Сотрудник не найден' });
+            }
+
+            // Обновляем должность
+            if (position_id && department_id && appointment_date) {
+                // Проверяем, существует ли запись о должности для этого сотрудника
+                const positionResult = await client.query('SELECT * FROM position WHERE id_employee = $1', [id]);
+                if (positionResult.rows.length > 0) {
+                    // Обновляем существующую запись о должности
+                    await client.query(
+                        `UPDATE position 
+                         SET 
+                             appointment_date = $1, 
+                             id_job_title = $2, 
+                             id_department = $3 
+                         WHERE id_employee = $4`,
+                        [appointment_date, position_id, department_id, id]
+                    );
+                } else {
+                    // Если записи о должности нет, создаем новую
+                    await client.query(
+                        `INSERT INTO position (appointment_date, id_employee, id_job_title, id_department) 
+                         VALUES ($1, $2, $3, $4)`,
+                        [appointment_date, id, position_id, department_id]
+                    );
+                }
+            } else {
+                await client.query('ROLLBACK');
+                return res.status(400).json({ message: 'Необходимые данные для должности отсутствуют' });
+            }
+
+            // Обновляем навыки
+            if (skills && Array.isArray(skills)) {
+                // Удаляем существующие навыки
+                await client.query('DELETE FROM skill_own WHERE id_employee = $1', [id]);
+                // Вставляем новые навыки
+                for (const skill of skills) {
+                    await client.query(
+                        `INSERT INTO skill_own (id_employee, id_skill_name, id_level_skill, last_check) 
+                         VALUES ($1, $2, $3, CURRENT_TIMESTAMP)`,
+                        [id, skill.id_skill_name, skill.id_level_skill]
+                    );
+                }
+            }
+
+            await client.query('COMMIT');
+            res.json(employeeResult.rows[0]);
+        } catch (err) {
+            await client.query('ROLLBACK');
+            console.error('Ошибка транзакции при обновлении сотрудника:', err);
+            res.status(500).send('Ошибка обновления сотрудника');
+        } finally {
+            client.release();
+        }
+    } catch (err) {
+        console.error('Ошибка подключения к базе данных:', err);
+        res.status(500).send('Ошибка обновления сотрудника');
     }
 });
 
@@ -416,19 +661,7 @@ app.get('/api/reports/employees', authenticateToken, async (req, res) => {
     }
 });
 
-// 2. Отчет по уникальным навыкам
-app.get('/api/reports/unique-skills', authenticateToken, async (req, res) => {
-    if (!req.user.is_admin) {
-        return res.status(403).json({ message: 'Доступ только для администраторов' });
-    }
-    try {
-        const result = await pool.query(`SELECT * FROM find_unique_skills_in_department()`);
-        res.json(result.rows);
-    } catch (err) {
-        console.error(err);
-        res.status(500).send('Ошибка получения отчета по уникальным навыкам');
-    }
-});
+
 
 
 // 5. Присвоить роль сотрудникам
@@ -727,7 +960,7 @@ app.post('/api/chats/:id_group_chat/add-members', authenticateToken, async (req,
     }
 
     try {
-        // Получение ID роли "member", предположим, что роль уже существует
+        
         const roleResult = await pool.query(
             `SELECT id_role FROM roles WHERE name = 'member' LIMIT 1`
         );
@@ -987,13 +1220,6 @@ app.get('/api/document_template', authenticateToken, async (req, res) => {
 
 
 
-
-
-
-// Маршруты отчетов
-
-
-
 // 2. Отчет по уникальным навыкам
 app.get('/api/reports/unique-skills', authenticateToken, async (req, res) => {
     if (!req.user.is_admin) {
@@ -1027,7 +1253,7 @@ app.post('/api/reports/notify-inactive', authenticateToken, async (req, res) => 
     if (!req.user.is_admin) {
         return res.status(403).json({ message: 'Доступ только для администраторов' });
     }
-    const { norm } = req.body; //Норма сообщений
+    const { norm } = req.body; 
     try {
         await pool.query(`SELECT NotifyInactiveEmployees($1)`, [norm]);
         res.status(200).json({ message: 'Уведомления отправлены' });
@@ -1172,22 +1398,32 @@ app.delete('/api/announcements/:id', authenticateToken, async (req, res) => {
 app.get('/api/positions', authenticateToken, async (req, res) => {
     try {
         const result = await pool.query(`
-            SELECT p.id_position, p.name AS position_name, p.appointment_date, 
-                   jt.name AS job_title, d.name AS department, o.office_number, 
-                   bc.address AS business_center_address
-            FROM position p
-            LEFT JOIN job_title jt ON p.id_job_title = jt.id_job_title
-            LEFT JOIN department d ON p.id_department = d.id_department
-            LEFT JOIN office o ON d.id_office = o.id_office
-            LEFT JOIN business_center bc ON o.id_business_center = bc.id_business_center
-            ORDER BY p.id_position ASC
-        `);
-        res.json(result.rows);
-    } catch (err) {
-        console.error(err);
-        res.status(500).send('Ошибка получения должностей');
-    }
-});
+ SELECT 
+    p.id_position, 
+    jt.name AS position_name, 
+    p.appointment_date, 
+    jt.id_job_title,
+    jt.name AS job_title, 
+    d.id_department,
+    d.name AS department, 
+    o.office_number, 
+    bc.address AS business_center_address,
+    e.full_name AS employee, 
+    e.email AS employee_email 
+FROM position p
+LEFT JOIN job_title jt ON p.id_job_title = jt.id_job_title
+LEFT JOIN department d ON p.id_department = d.id_department
+LEFT JOIN office o ON d.id_office = o.id_office
+LEFT JOIN business_center bc ON o.id_business_center = bc.id_business_center
+LEFT JOIN employee e ON p.id_employee = e.id_employee 
+ORDER BY p.id_position ASC;
+             `);
+             res.json(result.rows);
+         } catch (err) {
+             console.error(err);
+             res.status(500).send('Ошибка получения должностей');
+         }
+     });
 
 
 
@@ -1220,7 +1456,7 @@ app.put('/api/notifications/:id', authenticateToken, async (req, res) => {
     try {
         const result = await pool.query(
             `UPDATE notifications 
-             SET is_read = TRUE 
+             SET is_read = TRUE  
              WHERE id_notification = $1 AND id_employee = $2 
              RETURNING *`,
             [notificationId, userId]
@@ -1236,7 +1472,7 @@ app.put('/api/notifications/:id', authenticateToken, async (req, res) => {
 });
 
 
-// GET all notifications
+
 app.get('/api/notifications', authenticateToken, async (req, res) => {
     try {
       const result = await pool.query(`
@@ -1258,7 +1494,7 @@ app.get('/api/notifications', authenticateToken, async (req, res) => {
     }
   });
   
-  // GET notifications for a specific employee
+  
   app.get('/api/notifications/employee/:employeeId', authenticateToken, async (req, res) => {
     const { employeeId } = req.params;
     try {
@@ -1279,7 +1515,7 @@ app.get('/api/notifications', authenticateToken, async (req, res) => {
     }
   });
   
-  // POST a new notification
+
   app.post('/api/notifications', authenticateToken, async (req, res) => {
     const { id_employee, content } = req.body;
     try {
@@ -1295,7 +1531,7 @@ app.get('/api/notifications', authenticateToken, async (req, res) => {
     }
   });
   
-  // PUT to update a notification (e.g., mark as read)
+  
   app.put('/api/notifications/:id', authenticateToken, async (req, res) => {
     const { id } = req.params;
     const { content, is_read } = req.body;
@@ -1321,7 +1557,7 @@ app.get('/api/notifications', authenticateToken, async (req, res) => {
     }
   });
   
-  // DELETE a notification
+
   app.delete('/api/notifications/:id', authenticateToken, async (req, res) => {
     const { id } = req.params;
     try {
@@ -1348,7 +1584,7 @@ app.get('/api/reports/count-unread-messages', authenticateToken, async (req, res
         return res.status(403).json({ message: 'Доступ только для администраторов' });
     }
     try {
-        const result = await pool.query('SELECT * FROM countunreadmessagesperemployee()'); // Добавлено *
+        const result = await pool.query('SELECT * FROM countunreadmessagesperemployee()'); 
         res.json(result.rows);
     } catch (err) {
         console.error(err);
@@ -1372,7 +1608,16 @@ app.get('/api/announcements/active', authenticateToken, async (req, res) => {
 
 
 
-
+  // Получение всех уровней навыков
+  app.get('/api/levels', authenticateToken, async (req, res) => {
+    try {
+        const result = await pool.query('SELECT id_level_skill, level FROM level_skill ORDER BY id_level_skill ASC');
+        res.json(result.rows);
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Ошибка получения уровней навыков');
+    }
+});
 
 // Запуск сервера
 const PORT = 5000;

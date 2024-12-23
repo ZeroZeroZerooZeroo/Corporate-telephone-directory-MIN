@@ -29,7 +29,7 @@ function Chats() {
         const fetchChats = async () => {
             try {
                 const response = await apiService.getChats(user.id_employee);
-                console.log('Полученные чаты:', response.data); // Для отладки
+                console.log('Полученные чаты:', response.data); 
                 const uniqueChats = removeDuplicateChats(response.data);
                 setChats(uniqueChats);
             } catch (err) {

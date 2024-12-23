@@ -2,7 +2,7 @@ import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import ProtectedRoute from './components/ProtectedRoute';
-
+import CompanyInfo from './pages/CompanyInfo';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Profile from './pages/Profile';
@@ -77,6 +77,14 @@ function App() {
                         element={
                             <ProtectedRoute>
                                 <Events />
+                            </ProtectedRoute>
+                        }
+                    />
+                    <Route
+                    path="/positions" 
+                        element={
+                            <ProtectedRoute>
+                                <CompanyInfo />
                             </ProtectedRoute>
                         }
                     />
